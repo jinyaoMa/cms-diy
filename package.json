@@ -4,7 +4,9 @@
   "description": "try to be a NAS-like CMS",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "go:start": "main.exe",
+    "go:build-run": "go build server/main.go && main.exe",
+    "go:mod-tidy": "go mod tidy"
   },
   "repository": {
     "type": "git",
