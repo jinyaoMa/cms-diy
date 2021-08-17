@@ -1,4 +1,4 @@
-package models
+package model
 
 import (
 	"time"
@@ -9,10 +9,11 @@ import (
 type File struct {
 	gorm.Model
 	Name           string
-	IPath          string `gorm:"unique"`
-	APath          string `gorm:"index"`
+	APath          string `gorm:"index"` // absolute path
+	IPath          string `gorm:"index"` // id string for absolute path
+	TPath          string `gorm:"index"` // thumbnail path
 	Type           string `gorm:"check:type IN ('directory', 'file')"`
-	Ext            string `gorm:"check:ext LIKE '.%'"`
+	Ext            string
 	Size           Size
 	ShareCode      string
 	ShareExpiredAt time.Time

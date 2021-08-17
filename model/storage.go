@@ -1,4 +1,4 @@
-package models
+package model
 
 import (
 	"os"
@@ -44,7 +44,7 @@ var (
 	storage Storage
 )
 
-func init() {
+func init_storage() {
 	h = windows.MustLoadDLL("kernel32.dll")
 	cmd = h.MustFindProc("GetDiskFreeSpaceExW")
 
@@ -98,15 +98,18 @@ func InitUserSpace(userAccount string, fn NewFileCallback) error {
 	for _, branch := range storage.branches {
 		targetPath := filepath.Join(branch.APath, userAccount)
 		err := os.Mkdir(targetPath, os.ModeDir)
-		if os.IsExist(err) && initUserFiles(targetPath, fn) != nil {
+		if os.IsExist(err) && InitUserFiles(targetPath, fn) != nil {
 			return newError("User files initializing error")
+		}
+		if err != nil {
+			return err
 		}
 	}
 
 	return nil
 }
 
-func initUserFiles(userSpace string, fn NewFileCallback) error {
+func InitUserFiles(userSpace string, fn NewFileCallback) error {
 	return filepath.Walk(userSpace, func(apath string, fileInfo os.FileInfo, err error) error {
 		if fileInfo == nil {
 			return err

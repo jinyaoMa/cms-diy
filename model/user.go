@@ -1,15 +1,13 @@
-package models
+package model
 
 import (
-	"errors"
-
 	"gorm.io/gorm"
 )
 
 type User struct {
 	gorm.Model
 	Name     string
-	Account  string
+	Account  string `gorm:"unique"`
 	Password string
 	JwtKey   string
 	RoleID   uint
@@ -21,7 +19,7 @@ type Users []User
 func HasUserAccount(account string) (bool, User) {
 	var user User
 	result := db.First(&user, "account = ?", account)
-	return !errors.Is(result.Error, gorm.ErrRecordNotFound), user
+	return result.RowsAffected == 1, user
 }
 
 func CreateUser(user *User) error {

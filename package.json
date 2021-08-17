@@ -1,11 +1,11 @@
 {
   "name": "cms-diy",
-  "version": "0.0.1-202108170148",
+  "version": "0.0.1-202108171452",
   "description": "try to be a NAS-like CMS",
   "main": "index.js",
   "scripts": {
     "go:start": "main.exe",
-    "go:build-run": "go build server/main.go && main.exe",
+    "go:build-run": "go build main.go && main.exe",
     "go:mod-tidy": "go mod tidy"
   },
   "repository": {

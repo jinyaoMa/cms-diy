@@ -1,11 +1,9 @@
-package models
+package model
 
 const (
-	SERVER_PORT string = "55699"
-
 	DB_USER     string = "root"
 	DB_PASSWORD string = "root"
-	DB_HOST     string = "127.0.0.1"
+	DB_HOST     string = "localhost"
 	DB_PORT     string = "7531"
 	DB_NAME     string = "cmsdiy"
 	DB_CHARSET  string = "utf8mb4"

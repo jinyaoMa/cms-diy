@@ -1,4 +1,4 @@
-package models
+package model
 
 import (
 	"errors"
@@ -11,7 +11,7 @@ var (
 	randSource rand.Source
 )
 
-func init() {
+func init_p() {
 	randSource = rand.NewSource(time.Now().Unix())
 }
 
