@@ -5,15 +5,6 @@ import (
 	"gorm.io/gorm"
 )
 
-const (
-	DB_USER     string = "root"
-	DB_PASSWORD string = "root"
-	DB_HOST     string = "127.0.0.1"
-	DB_PORT     string = "7531"
-	DB_NAME     string = "cmsdiy"
-	DB_CHARSET  string = "utf8mb4"
-)
-
 var (
 	db *gorm.DB
 )
@@ -31,10 +22,9 @@ func init() {
 		PrepareStmt: true,
 	})
 	if err != nil {
-		panic("failed to connect database")
+		panic("Failed to connect database")
 	}
-}
 
-func DB() *gorm.DB {
-	return db
+	initDefaultRoles()
+	initRootUser()
 }

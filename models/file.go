@@ -9,14 +9,19 @@ import (
 type File struct {
 	gorm.Model
 	Name           string
-	Path           string `gorm:"not null;index"`
-	Type           string `gorm:"check:type IN ('directory', 'file');not null"`
-	Extension      string
-	Size           uint64
-	Recycled       uint `gorm:"check:recycled IN (0, 1);default:0"`
+	IPath          string `gorm:"unique"`
+	APath          string `gorm:"index"`
+	Type           string `gorm:"check:type IN ('directory', 'file')"`
+	Ext            string `gorm:"check:ext LIKE '.%'"`
+	Size           Size
 	ShareCode      string
 	ShareExpiredAt time.Time
+	Recycled       uint `gorm:"check:recycled IN (0, 1);default:0"`
 	UserID         uint
 }
-
 type Files []File
+
+const (
+	FILE_TYPE_DIRECTORY string = "directory"
+	FILE_TYPE_FILE      string = "file"
+)
