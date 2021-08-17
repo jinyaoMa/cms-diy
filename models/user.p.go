@@ -23,29 +23,29 @@ func initRootUser() {
 		}
 
 		var userFiles []File
-			err := InitUserSpace(ROOT_ACCOUNT, func(apath string, fileInfo os.FileInfo) {
-				var fileType string
-				if fileInfo.IsDir() {
-					fileType = FILE_TYPE_DIRECTORY
-				} else {
-					fileType = FILE_TYPE_FILE
-				}
-				userFiles = append(userFiles, File{
-					Name:           filepath.Base(apath),
-					IPath:          fmt.Sprintf("%x", sha256.Sum256([]byte(apath))),
-					APath:          apath,
-					Type:           fileType,
-					Ext:            filepath.Ext(apath),
-					Size:           Size(fileInfo.Size()),
-					UserID:         user.ID,
-				})
+		err := InitUserSpace(ROOT_ACCOUNT, func(apath string, fileInfo os.FileInfo) {
+			var fileType string
+			if fileInfo.IsDir() {
+				fileType = FILE_TYPE_DIRECTORY
+			} else {
+				fileType = FILE_TYPE_FILE
+			}
+			userFiles = append(userFiles, File{
+				Name:   filepath.Base(apath),
+				IPath:  fmt.Sprintf("%x", sha256.Sum256([]byte(apath))),
+				APath:  apath,
+				Type:   fileType,
+				Ext:    filepath.Ext(apath),
+				Size:   Size(fileInfo.Size()),
+				UserID: user.ID,
 			})
-			if err != nil {
-				println("User root space initializing error")
-			}
-			resultUserFiles := db.CreateInBatches(userFiles, 1000)
-			if resultUserFiles.Error != nil {
-				println("User files init batches error")
-			}
+		})
+		if err != nil {
+			println("User root space initializing error")
+		}
+		resultUserFiles := db.CreateInBatches(userFiles, 1000)
+		if resultUserFiles.Error != nil {
+			println("User files init batches error")
+		}
 	}
 }
