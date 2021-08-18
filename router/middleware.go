@@ -1,11 +1,76 @@
 package router
 
 import (
+	"jinyaoma/cms-diy/model"
 	"net/http"
 	"regexp"
+	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
+
+type JWT struct {
+	SigningKey []byte
+}
+type JWTClaims struct {
+	UserID string `json:"userId"`
+	jwt.StandardClaims
+}
+
+var (
+	TokenExpired     error = newError("Token is expired")
+	TokenNotValidYet error = newError("Token not active yet")
+	TokenMalformed   error = newError("That's not even a token")
+	TokenInvalid     error = newError("Couldn't handle this token:")
+)
+
+func (j *JWT) CreateToken(claims JWTClaims) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
+	return token.SignedString(j.SigningKey)
+}
+
+func (j *JWT) ParseToken(tokenString string) (*JWTClaims, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return j.SigningKey, nil
+	})
+	if err != nil {
+		if ve, ok := err.(*jwt.ValidationError); ok {
+			if ve.Errors&jwt.ValidationErrorMalformed != 0 {
+				return nil, TokenMalformed
+			} else if ve.Errors&jwt.ValidationErrorExpired != 0 {
+				// Token is expired
+				return nil, TokenExpired
+			} else if ve.Errors&jwt.ValidationErrorNotValidYet != 0 {
+				return nil, TokenNotValidYet
+			} else {
+				return nil, TokenInvalid
+			}
+		}
+	}
+	if claims, ok := token.Claims.(*JWTClaims); ok && token.Valid {
+		return claims, nil
+	}
+	return nil, TokenInvalid
+}
+
+func (j *JWT) RefreshToken(tokenString string) (string, error) {
+	jwt.TimeFunc = func() time.Time {
+		return time.Unix(0, 0)
+	}
+	token, err := jwt.ParseWithClaims(tokenString, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return j.SigningKey, nil
+	})
+	if err != nil {
+		return "", err
+	}
+	if claims, ok := token.Claims.(*JWTClaims); ok && token.Valid {
+		jwt.TimeFunc = time.Now
+		claims.StandardClaims.ExpiresAt = time.Now().Add(1 * time.Hour).Unix()
+		return j.CreateToken(*claims)
+	}
+	return "", TokenInvalid
+}
 
 func Cors() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -28,15 +93,47 @@ func Cors() gin.HandlerFunc {
 }
 
 func Auth() gin.HandlerFunc {
+	bearerRegexp, err := regexp.Compile("^Bearer (\\d+) (.+)$")
+	if err != nil {
+		panic("Failed to compile regexp in middleware Auth")
+	}
+
 	return func(c *gin.Context) {
-		token := c.Request.Header.Get("Authorization")
-		isFormatted, _ := regexp.MatchString("^Bearer ", token)
-		if !isFormatted {
+		authorization := c.Request.Header.Get("Authorization")
+		matches := bearerRegexp.FindStringSubmatch(authorization)
+		if matches == nil {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
-		println("Auth --------------------------- IN")
 
+		userId := matches[1]
+		user, hasUser := model.GetUserById(userId)
+		if !hasUser {
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		token := matches[2]
+		jwToken := JWT{
+			SigningKey: []byte(user.JwtKey),
+		}
+		claims, err := jwToken.ParseToken(token)
+		if err != nil {
+			if err == TokenExpired {
+				c.AbortWithStatus(http.StatusUnauthorized)
+				return
+			}
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+
+		if userId != claims.UserID {
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		c.Set("user", user)
+		c.Set("claims", claims)
 		c.Next()
 	}
 }

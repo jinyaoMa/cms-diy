@@ -1,6 +1,7 @@
 package router
 
 import (
+	"jinyaoma/cms-diy/router/routes"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -16,6 +17,11 @@ func init() {
 	router.MaxMultipartMemory = 8 << 20 // 8 MiB
 	router.Use(Cors())
 
+	authGroup := router.Group("/auth")
+	{
+		authGroup.POST("/login", routes.Login())
+	}
+
 	apiGroup := router.Group("/api")
 	{
 		api := apiGroup.Use(Auth())
@@ -24,7 +30,6 @@ func init() {
 				"test": "pong",
 			})
 		})
-		init_login(apiGroup)
 	}
 }
 

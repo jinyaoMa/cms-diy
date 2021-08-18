@@ -11,8 +11,14 @@ type Role struct {
 }
 type Roles []Role
 
-func HasRoleName(name string) (bool, Role) {
-	var role Role
+func GetRoleByName(name string) (role Role, hasRole bool) {
 	result := db.First(&role, "name = ?", name)
-	return result.RowsAffected == 1, role
+	hasRole = result.RowsAffected == 1
+	return
+}
+
+func GetRoleById(id uint) (role Role, hasRole bool) {
+	result := db.First(&role, id)
+	hasRole = result.RowsAffected == 1
+	return
 }

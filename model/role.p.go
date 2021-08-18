@@ -1,7 +1,7 @@
 package model
 
 func prepareDefaultRoles() {
-	hasRole, _ := HasRoleName(ROOT_ROLENAME)
+	_, hasRole := GetRoleByName(ROOT_ROLENAME)
 	if !hasRole {
 		role := Role{
 			Name:  ROOT_ROLENAME,

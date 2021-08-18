@@ -8,8 +8,8 @@ import (
 )
 
 func prepareRootUser() {
-	hasRoot, _ := HasUserAccount(ROOT_ACCOUNT)
-	hasRole, role := HasRoleName(ROOT_ROLENAME)
+	_, hasRoot := GetUserByAccount(ROOT_ACCOUNT)
+	role, hasRole := GetRoleByName(ROOT_ROLENAME)
 	if !hasRoot && hasRole {
 		user := User{
 			Name:     ROOT_USERNAME,
