@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 )
 
-func initRootUser() {
+func prepareRootUser() {
 	hasRoot, _ := HasUserAccount(ROOT_ACCOUNT)
 	hasRole, role := HasRoleName(ROOT_ROLENAME)
 	if !hasRoot && hasRole {
@@ -23,7 +23,7 @@ func initRootUser() {
 		}
 
 		var userFiles []File
-		err := InitUserSpace(ROOT_ACCOUNT, func(apath string, fileInfo os.FileInfo) {
+		err := NewUserSpace(ROOT_ACCOUNT, func(apath string, fileInfo os.FileInfo) {
 			var fileType string
 			if fileInfo.IsDir() {
 				fileType = FILE_TYPE_DIRECTORY

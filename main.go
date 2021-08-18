@@ -1,9 +1,11 @@
 package main
 
 import (
-	_ "jinyaoma/cms-diy/model"
+	"jinyaoma/cms-diy/model"
+	"jinyaoma/cms-diy/router"
 )
 
 func main() {
-	
+	model.Run()
+	router.Run()
 }

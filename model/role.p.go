@@ -1,6 +1,6 @@
 package model
 
-func initDefaultRoles() {
+func prepareDefaultRoles() {
 	hasRole, _ := HasRoleName(ROOT_ROLENAME)
 	if !hasRole {
 		role := Role{

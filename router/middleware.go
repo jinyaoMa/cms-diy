@@ -2,6 +2,7 @@ package router
 
 import (
 	"net/http"
+	"regexp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,6 +21,7 @@ func Cors() gin.HandlerFunc {
 		}
 		if method == "OPTIONS" {
 			c.AbortWithStatus(http.StatusNoContent)
+			return
 		}
 		c.Next()
 	}
@@ -27,7 +29,14 @@ func Cors() gin.HandlerFunc {
 
 func Auth() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		
+		token := c.Request.Header.Get("Authorization")
+		isFormatted, _ := regexp.MatchString("^Bearer ", token)
+		if !isFormatted {
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+		println("Auth --------------------------- IN")
+
 		c.Next()
 	}
 }

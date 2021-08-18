@@ -12,7 +12,9 @@ var (
 func init() {
 	init_p()
 	init_storage()
+}
 
+func Run() {
 	var err error
 	db, err = gorm.Open(mysql.New(mysql.Config{
 		DSN:                       DB_USER + ":" + DB_PASSWORD + "@tcp(" + DB_HOST + ":" + DB_PORT + ")/" + DB_NAME + "?charset=" + DB_CHARSET + "&parseTime=True&loc=Local",
@@ -29,6 +31,6 @@ func init() {
 	}
 
 	db.AutoMigrate(&User{}, &Role{}, &File{})
-	initDefaultRoles()
-	initRootUser()
+	prepareDefaultRoles()
+	prepareRootUser()
 }

@@ -27,7 +27,7 @@ type Storage struct {
 	Available Size
 	Free      Size
 }
-type NewFileCallback func(apath string, fileInfo os.FileInfo)
+type ScannedFileCallback func(apath string, fileInfo os.FileInfo)
 
 const (
 	B  Size = 1
@@ -90,7 +90,7 @@ func (s *Storage) Update() {
 	}
 }
 
-func InitUserSpace(userAccount string, fn NewFileCallback) error {
+func NewUserSpace(userAccount string, fn ScannedFileCallback) error {
 	if strings.ContainsAny(userAccount, "\\/:*?\"<>|") {
 		return newError("User account format not allowed")
 	}
@@ -98,7 +98,7 @@ func InitUserSpace(userAccount string, fn NewFileCallback) error {
 	for _, branch := range storage.branches {
 		targetPath := filepath.Join(branch.APath, userAccount)
 		err := os.Mkdir(targetPath, os.ModeDir)
-		if os.IsExist(err) && InitUserFiles(targetPath, fn) != nil {
+		if os.IsExist(err) && ScanUserFiles(targetPath, fn) != nil {
 			return newError("User files initializing error")
 		}
 		if err != nil {
@@ -109,7 +109,7 @@ func InitUserSpace(userAccount string, fn NewFileCallback) error {
 	return nil
 }
 
-func InitUserFiles(userSpace string, fn NewFileCallback) error {
+func ScanUserFiles(userSpace string, fn ScannedFileCallback) error {
 	return filepath.Walk(userSpace, func(apath string, fileInfo os.FileInfo, err error) error {
 		if fileInfo == nil {
 			return err
