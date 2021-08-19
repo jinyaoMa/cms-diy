@@ -33,4 +33,6 @@ func Run() {
 	db.AutoMigrate(&User{}, &Role{}, &File{})
 	prepareDefaultRoles()
 	prepareRootUser()
+
+	println("MODEL RUN...")
 }

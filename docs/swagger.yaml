@@ -34,7 +34,6 @@ paths:
       - description: Authorization
         in: header
         name: Authorization
-        required: true
         type: string
       produces:
       - application/json

@@ -12,7 +12,7 @@ import (
 // @accept application/x-www-form-urlencoded
 // @Produce  json
 // @Security BearerIdAuth
-// @param Authorization header string true "Authorization"
+// @param Authorization header string false "Authorization"
 // @Success 200 {object} string "Pass"
 // @Router /api/test [get]
 func Test(c *gin.Context) {

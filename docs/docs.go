@@ -53,8 +53,7 @@ var doc = `{
                         "type": "string",
                         "description": "Authorization",
                         "name": "Authorization",
-                        "in": "header",
-                        "required": true
+                        "in": "header"
                     }
                 ],
                 "responses": {
