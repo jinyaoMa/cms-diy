@@ -1,10 +1,10 @@
 package router
 
 import (
+	"fmt"
 	"jinyaoma/cms-diy/model"
 	"net/http"
 	"regexp"
-	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -14,7 +14,7 @@ type JWT struct {
 	SigningKey []byte
 }
 type JWTClaims struct {
-	UserID string `json:"userId"`
+	UserID uint `json:"userId"`
 	jwt.StandardClaims
 }
 
@@ -26,7 +26,7 @@ var (
 )
 
 func (j *JWT) CreateToken(claims JWTClaims) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(j.SigningKey)
 }
 
@@ -54,24 +54,6 @@ func (j *JWT) ParseToken(tokenString string) (*JWTClaims, error) {
 	return nil, TokenInvalid
 }
 
-func (j *JWT) RefreshToken(tokenString string) (string, error) {
-	jwt.TimeFunc = func() time.Time {
-		return time.Unix(0, 0)
-	}
-	token, err := jwt.ParseWithClaims(tokenString, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return j.SigningKey, nil
-	})
-	if err != nil {
-		return "", err
-	}
-	if claims, ok := token.Claims.(*JWTClaims); ok && token.Valid {
-		jwt.TimeFunc = time.Now
-		claims.StandardClaims.ExpiresAt = time.Now().Add(1 * time.Hour).Unix()
-		return j.CreateToken(*claims)
-	}
-	return "", TokenInvalid
-}
-
 func Cors() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		method := c.Request.Method
@@ -93,7 +75,7 @@ func Cors() gin.HandlerFunc {
 }
 
 func Auth() gin.HandlerFunc {
-	bearerRegexp, err := regexp.Compile("^Bearer (\\d+) (.+)$")
+	bearerRegexp, err := regexp.Compile(`^Bearer (\d+) (.+)$`)
 	if err != nil {
 		panic("Failed to compile regexp in middleware Auth")
 	}
@@ -119,15 +101,11 @@ func Auth() gin.HandlerFunc {
 		}
 		claims, err := jwToken.ParseToken(token)
 		if err != nil {
-			if err == TokenExpired {
-				c.AbortWithStatus(http.StatusUnauthorized)
-				return
-			}
-			c.AbortWithStatus(http.StatusInternalServerError)
+			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
-		if userId != claims.UserID {
+		if userId != fmt.Sprintf("%d", claims.UserID) {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
