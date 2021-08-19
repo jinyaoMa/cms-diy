@@ -20,16 +20,16 @@ func bindFormPost(c *gin.Context, form interface{}) error {
 }
 
 func generateToken(c *gin.Context, user model.User) (token string, err error) {
-	now := time.Now()
+	now := time.Now().Unix()
 	claims := JWTClaims{
 		UserID: user.ID,
 		StandardClaims: jwt.StandardClaims{
 			Audience:  user.Name,
-			ExpiresAt: now.AddDate(0, 1, 0).Unix(), // expire next month
+			ExpiresAt: now + TOKEN_VALID_TIME_IN_SECOND,
 			Id:        fmt.Sprintf("%d", user.ID),
-			IssuedAt:  now.Unix(),
+			IssuedAt:  now,
 			Issuer:    model.ROOT_USERNAME,
-			NotBefore: now.Unix(),
+			NotBefore: now,
 			Subject:   user.Name,
 		},
 	}
@@ -39,7 +39,6 @@ func generateToken(c *gin.Context, user model.User) (token string, err error) {
 	}
 	token, err = jwToken.CreateToken(claims)
 	if err != nil {
-		println(err.Error())
 		c.AbortWithStatus(http.StatusInternalServerError)
 	}
 	return

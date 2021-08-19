@@ -1,10 +1,17 @@
 package router
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 )
+
+type JsonObject map[string]interface{}
+type Json200Response struct {
+	Success bool       `json:"success"`
+	Data    JsonObject `json:"data"`
+}
+type Json404Response struct {
+	Error string `json:"error"`
+}
 
 func NewRoutes(r *gin.Engine) {
 	r.Use(Cors())
@@ -17,10 +24,6 @@ func NewRoutes(r *gin.Engine) {
 	apiGroup := r.Group("/api")
 	{
 		api := apiGroup.Use(Auth())
-		api.GET("/ping", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{
-				"test": "pong",
-			})
-		})
+		api.GET("/test", Test)
 	}
 }

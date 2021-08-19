@@ -1,0 +1,90 @@
+definitions:
+  router.Json200Response:
+    properties:
+      data:
+        $ref: '#/definitions/router.JsonObject'
+      success:
+        type: boolean
+    type: object
+  router.Json404Response:
+    properties:
+      error:
+        type: string
+    type: object
+  router.JsonObject:
+    additionalProperties: true
+    type: object
+info:
+  contact:
+    name: Github Issues
+    url: https://github.com/jinyaoMa/cms-diy/issues
+  description: '"try to be a NAS-like CMS"'
+  license:
+    name: MIT
+    url: https://github.com/jinyaoMa/cms-diy/blob/main/LICENSE
+  title: CMS_DIY (BACKEND)
+  version: 0.0.1
+paths:
+  /api/test:
+    get:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Login with account and password
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Pass
+          schema:
+            type: string
+      security:
+      - BearerIdAuth: []
+      summary: Login
+      tags:
+      - After Authorization
+  /auth/login:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Login with account and password
+      parameters:
+      - description: Account
+        in: formData
+        name: account
+        required: true
+        type: string
+      - description: Password
+        in: formData
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{"userid":1,"username":"cms-diy","role":"admin","permission":"*","token":""}}'
+          schema:
+            $ref: '#/definitions/router.Json200Response'
+        "400":
+          description: LoginForm binding error
+        "404":
+          description: '{"error":"error msg"}'
+          schema:
+            $ref: '#/definitions/router.Json404Response'
+        "500":
+          description: Token generating error
+      summary: Login
+      tags:
+      - Before Authorization
+securityDefinitions:
+  BearerIdAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
