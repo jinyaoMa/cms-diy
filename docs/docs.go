@@ -37,17 +37,17 @@ var doc = `{
                         "BearerIdAuth": []
                     }
                 ],
-                "description": "Login with account and password",
+                "description": "Test Token",
                 "consumes": [
-                    "application/x-www-form-urlencoded"
+                    "text/plain"
                 ],
                 "produces": [
-                    "application/json"
+                    "text/plain"
                 ],
                 "tags": [
                     "After Authorization"
                 ],
-                "summary": "Login",
+                "summary": "Test",
                 "parameters": [
                     {
                         "type": "string",

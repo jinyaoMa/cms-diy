@@ -90,7 +90,7 @@ func (s *Storage) Update() {
 	}
 }
 
-func NewUserSpace(userAccount string, fn ScannedFileCallback) error {
+func NewUserSpace(userAccount string, fn ScannedFileCallback, isForcedScan bool) error {
 	if strings.ContainsAny(userAccount, "\\/:*?\"<>|") {
 		return newError("User account format not allowed")
 	}
@@ -98,8 +98,11 @@ func NewUserSpace(userAccount string, fn ScannedFileCallback) error {
 	for _, branch := range storage.branches {
 		targetPath := filepath.Join(branch.APath, userAccount)
 		err := os.Mkdir(targetPath, os.ModeDir)
-		if os.IsExist(err) && ScanUserFiles(targetPath, fn) != nil {
-			return newError("User files initializing error")
+		if os.IsExist(err) {
+			if isForcedScan && ScanUserFiles(targetPath, fn) != nil {
+				return newError("User files initializing error")
+			}
+			return newError("User space exists")
 		}
 		if err != nil {
 			return err

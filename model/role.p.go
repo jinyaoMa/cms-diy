@@ -3,12 +3,20 @@ package model
 func prepareDefaultRoles() {
 	_, hasRole := GetRoleByName(ROOT_ROLENAME)
 	if !hasRole {
-		role := Role{
-			Name:  ROOT_ROLENAME,
-			Space: storage.Available,
+		roles := Roles{
+			{
+				Name:       ROLE_DEFAULT_MEMBER_NAME,
+				Permission: ROLE_DEFAULT_MEMBER_PERMISSION,
+				Space:      ROLE_DEFAULT_MEMBER_SPACE,
+				Code:       ROLE_DEFAULT_MEMBER_CODE,
+			},
+			{
+				Name:  ROOT_ROLENAME,
+				Space: storage.Available,
+			},
 		}
 
-		if db.Create(&role).Error == nil {
+		if db.Create(&roles).Error == nil {
 			println("Default roles initialized")
 		}
 	}

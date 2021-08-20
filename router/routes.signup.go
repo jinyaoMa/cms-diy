@@ -7,9 +7,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type LoginForm struct {
+type SignupForm struct {
+	Username string `form:"username" binding:"required"`
 	Account  string `form:"account" binding:"required"`
 	Password string `form:"password" binding:"required"`
+	Code     string `form:"code" binding:"required"`
 }
 
 // @Summary Login
@@ -24,29 +26,52 @@ type LoginForm struct {
 // @Failure 404 {object} Json404Response "{"error":"error msg"}"
 // @Failure 500 "Token generating error"
 // @Router /auth/login [post]
-func Login(c *gin.Context) {
-	var form LoginForm
+func Signup(c *gin.Context) {
+	userCount, ok := model.GetActiveUsersCount()
+	if !ok || userCount >= model.UserLimit {
+		c.JSON(http.StatusNotFound, Json404Response{
+			Error: "limited users for signup",
+		})
+		return
+	}
+
+	var form SignupForm
 	if bindFormPost(c, &form) != nil {
 		return
 	}
 
-	user, hasUser := model.GetUserByAccountPassword(form.Account, form.Password)
-	if !hasUser {
-		c.JSON(http.StatusNotFound, Json404Response{
-			Error: "unmatched user password",
-		})
-		return
-	}
-
-	role, hasRole := model.GetRoleById(user.RoleID)
+	role, hasRole := model.GetRoleByCode(form.Code)
 	if !hasRole {
 		c.JSON(http.StatusNotFound, Json404Response{
-			Error: "user has no role assigned",
+			Error: "invalid invitation code",
 		})
 		return
 	}
 
-	token, err := generateToken(c, user)
+	userfiles, errCreateUserSpaceFiles := model.CreateUserSpaceFiles(form.Account)
+	if errCreateUserSpaceFiles != nil {
+		c.JSON(http.StatusNotFound, Json404Response{
+			Error: "invalid user account",
+		})
+		return
+	}
+
+	newUser := model.User{
+		Name:     form.Username,
+		Account:  form.Account,
+		Password: form.Password,
+		RoleID:   role.ID,
+		Files:    userfiles,
+	}
+	errCreateUser := model.CreateUser(&newUser)
+	if errCreateUser != nil {
+		c.JSON(http.StatusNotFound, Json404Response{
+			Error: "fail to create user",
+		})
+		return
+	}
+
+	token, err := generateToken(c, newUser)
 	if err != nil {
 		return
 	}
@@ -54,8 +79,8 @@ func Login(c *gin.Context) {
 	c.JSON(http.StatusOK, Json200Response{
 		Success: true,
 		Data: JsonObject{
-			"userid":     user.ID,
-			"username":   user.Name,
+			"userid":     newUser.ID,
+			"username":   newUser.Name,
 			"role":       role.Name,
 			"permission": role.Permission,
 			"token":      token,

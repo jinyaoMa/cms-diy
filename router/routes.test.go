@@ -6,11 +6,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// @Summary Login
-// @Description Login with account and password
+// @Summary Test
+// @Description Test Token
 // @Tags After Authorization
-// @accept application/x-www-form-urlencoded
-// @Produce  json
+// @accept plain
+// @Produce  plain
 // @Security BearerIdAuth
 // @param Authorization header string false "Authorization"
 // @Success 200 {object} string "Pass"

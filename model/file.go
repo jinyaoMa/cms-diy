@@ -1,6 +1,10 @@
 package model
 
 import (
+	"crypto/sha256"
+	"fmt"
+	"os"
+	"path/filepath"
 	"time"
 
 	"gorm.io/gorm"
@@ -26,3 +30,54 @@ const (
 	FILE_TYPE_DIRECTORY string = "directory"
 	FILE_TYPE_FILE      string = "file"
 )
+
+func CreateUserSpaceFiles(userAccount string) (userFiles Files, err error) {
+	err = NewUserSpace(userAccount, func(apath string, fileInfo os.FileInfo) {
+		var fileType string
+		if fileInfo.IsDir() {
+			fileType = FILE_TYPE_DIRECTORY
+		} else {
+			fileType = FILE_TYPE_FILE
+		}
+		userFiles = append(userFiles, File{
+			Name:  filepath.Base(apath),
+			IPath: fmt.Sprintf("%x", sha256.Sum256([]byte(apath))),
+			APath: apath,
+			Type:  fileType,
+			Ext:   filepath.Ext(apath),
+			Size:  Size(fileInfo.Size()),
+		})
+	}, false)
+	if err != nil {
+		return userFiles, newError("User[" + userAccount + "] space initializing error")
+	}
+	return
+}
+
+func InitializeUserSpaceFiles(user User) (userFiles Files, err error) {
+	err = NewUserSpace(user.Account, func(apath string, fileInfo os.FileInfo) {
+		var fileType string
+		if fileInfo.IsDir() {
+			fileType = FILE_TYPE_DIRECTORY
+		} else {
+			fileType = FILE_TYPE_FILE
+		}
+		userFiles = append(userFiles, File{
+			Name:   filepath.Base(apath),
+			IPath:  fmt.Sprintf("%x", sha256.Sum256([]byte(apath))),
+			APath:  apath,
+			Type:   fileType,
+			Ext:    filepath.Ext(apath),
+			Size:   Size(fileInfo.Size()),
+			UserID: user.ID,
+		})
+	}, true)
+	if err != nil {
+		return userFiles, newError("User[" + user.Account + "] space initializing error")
+	}
+	resultUserFiles := db.CreateInBatches(userFiles, 1000)
+	if resultUserFiles.Error != nil {
+		return userFiles, newError("User[" + user.Account + "] files init batches error")
+	}
+	return userFiles, nil
+}
