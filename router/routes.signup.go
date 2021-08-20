@@ -14,18 +14,20 @@ type SignupForm struct {
 	Code     string `form:"code" binding:"required"`
 }
 
-// @Summary Login
-// @Description Login with account and password
+// @Summary Signup
+// @Description Signup as a new user with role by invitation code
 // @Tags Before Authorization
 // @accept x-www-form-urlencoded
 // @Produce json
+// @Param username formData string true "Username"
 // @Param account formData string true "Account"
 // @Param password formData string true "Password"
+// @Param code formData string true "Invitation Code"
 // @Success 200 {object} Json200Response "{"success":true,"data":{"userid":1,"username":"cms-diy","role":"admin","permission":"*","token":""}}"
-// @Failure 400 "LoginForm binding error"
+// @Failure 400 "SignupForm binding error"
 // @Failure 404 {object} Json404Response "{"error":"error msg"}"
 // @Failure 500 "Token generating error"
-// @Router /auth/login [post]
+// @Router /auth/signup [post]
 func Signup(c *gin.Context) {
 	userCount, ok := model.GetActiveUsersCount()
 	if !ok || userCount >= model.UserLimit {

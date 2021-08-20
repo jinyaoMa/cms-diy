@@ -81,6 +81,50 @@ paths:
       summary: Login
       tags:
       - Before Authorization
+  /auth/signup:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Signup as a new user with role by invitation code
+      parameters:
+      - description: Username
+        in: formData
+        name: username
+        required: true
+        type: string
+      - description: Account
+        in: formData
+        name: account
+        required: true
+        type: string
+      - description: Password
+        in: formData
+        name: password
+        required: true
+        type: string
+      - description: Invitation Code
+        in: formData
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{"userid":1,"username":"cms-diy","role":"admin","permission":"*","token":""}}'
+          schema:
+            $ref: '#/definitions/router.Json200Response'
+        "400":
+          description: SignupForm binding error
+        "404":
+          description: '{"error":"error msg"}'
+          schema:
+            $ref: '#/definitions/router.Json404Response'
+        "500":
+          description: Token generating error
+      summary: Signup
+      tags:
+      - Before Authorization
 securityDefinitions:
   BearerIdAuth:
     in: header

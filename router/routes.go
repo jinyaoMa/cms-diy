@@ -19,6 +19,7 @@ func NewRoutes(r *gin.Engine) {
 	authGroup := r.Group("/auth")
 	{
 		authGroup.POST("/login", Login)
+		authGroup.POST("/signup", Signup)
 	}
 
 	apiGroup := r.Group("/api")

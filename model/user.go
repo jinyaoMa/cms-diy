@@ -6,14 +6,15 @@ import (
 
 type User struct {
 	gorm.Model
-	Name     string
-	Account  string `gorm:"unique"`
-	Password string
-	JwtKey   string
-	Active   uint `gorm:"check:active IN (0, 1);default:1"`
-	RoleID   uint
-	Role     Role
-	Files    Files
+	Name       string
+	Account    string `gorm:"unique"`
+	Password   string
+	JwtKey     string
+	Active     uint `gorm:"check:active IN (0, 1);default:1"`
+	IsReserved uint `gorm:"check:is_reserved IN (0, 1);default:0"` // root user to be reserved
+	RoleID     uint
+	Role       Role
+	Files      Files
 }
 type Users []User
 

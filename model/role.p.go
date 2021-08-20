@@ -9,10 +9,12 @@ func prepareDefaultRoles() {
 				Permission: ROLE_DEFAULT_MEMBER_PERMISSION,
 				Space:      ROLE_DEFAULT_MEMBER_SPACE,
 				Code:       ROLE_DEFAULT_MEMBER_CODE,
+				IsReserved: 1,
 			},
 			{
-				Name:  ROOT_ROLENAME,
-				Space: storage.Available,
+				Name:       ROOT_ROLENAME,
+				Space:      storage.Available,
+				IsReserved: 1,
 			},
 		}
 
