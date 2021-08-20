@@ -24,7 +24,7 @@ type LoginForm struct {
 // @Failure 404 {object} Json404Response "{"error":"error msg"}"
 // @Failure 500 "Token generating error"
 // @Router /auth/login [post]
-func Login(c *gin.Context) {
+func login(c *gin.Context) {
 	var form LoginForm
 	if bindFormPost(c, &form) != nil {
 		return

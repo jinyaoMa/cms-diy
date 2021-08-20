@@ -25,6 +25,30 @@ info:
   title: CMS_DIY (BACKEND)
   version: 0.0.1
 paths:
+  /api/extendTokenExpireTime:
+    get:
+      consumes:
+      - text/plain
+      description: Make up a new token to extend expire time
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{"token":""}}'
+          schema:
+            $ref: '#/definitions/router.Json200Response'
+        "500":
+          description: Token generating error
+      security:
+      - BearerIdAuth: []
+      summary: ExtendTokenExpireTime
+      tags:
+      - After Authorization
   /api/test:
     get:
       consumes:
@@ -36,12 +60,14 @@ paths:
         name: Authorization
         type: string
       produces:
-      - text/plain
+      - application/json
       responses:
         "200":
-          description: Pass
+          description: '{"success":true,"data":{"user":"admin","isTokenValid":true}}'
           schema:
-            type: string
+            $ref: '#/definitions/router.Json200Response'
+        "500":
+          description: Token generating error
       security:
       - BearerIdAuth: []
       summary: Test

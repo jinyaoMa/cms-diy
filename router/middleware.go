@@ -5,6 +5,7 @@ import (
 	"jinyaoma/cms-diy/model"
 	"net/http"
 	"regexp"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -106,6 +107,11 @@ func Auth() gin.HandlerFunc {
 		}
 
 		if userId != fmt.Sprintf("%d", claims.UserID) {
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		if claims.ExpiresAt < time.Now().Unix() {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}

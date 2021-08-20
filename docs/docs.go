@@ -30,6 +30,45 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/extendTokenExpireTime": {
+            "get": {
+                "security": [
+                    {
+                        "BearerIdAuth": []
+                    }
+                ],
+                "description": "Make up a new token to extend expire time",
+                "consumes": [
+                    "text/plain"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "After Authorization"
+                ],
+                "summary": "ExtendTokenExpireTime",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"success\":true,\"data\":{\"token\":\"\"}}",
+                        "schema": {
+                            "$ref": "#/definitions/router.Json200Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Token generating error"
+                    }
+                }
+            }
+        },
         "/api/test": {
             "get": {
                 "security": [
@@ -42,7 +81,7 @@ var doc = `{
                     "text/plain"
                 ],
                 "produces": [
-                    "text/plain"
+                    "application/json"
                 ],
                 "tags": [
                     "After Authorization"
@@ -58,10 +97,13 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Pass",
+                        "description": "{\"success\":true,\"data\":{\"user\":\"admin\",\"isTokenValid\":true}}",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/router.Json200Response"
                         }
+                    },
+                    "500": {
+                        "description": "Token generating error"
                     }
                 }
             }

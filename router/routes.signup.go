@@ -28,7 +28,7 @@ type SignupForm struct {
 // @Failure 404 {object} Json404Response "{"error":"error msg"}"
 // @Failure 500 "Token generating error"
 // @Router /auth/signup [post]
-func Signup(c *gin.Context) {
+func signup(c *gin.Context) {
 	userCount, ok := model.GetActiveUsersCount()
 	if !ok || userCount >= model.UserLimit {
 		c.JSON(http.StatusNotFound, Json404Response{

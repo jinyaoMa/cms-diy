@@ -4,10 +4,12 @@
 Tested in:
 
 - Windows 10
+- MySQL Server 8.0
 
 ## MySQL Server Config
 
 - Database name: `cms-diy`
+- Charset `utf8mb4`
 - Access `cms-diy` under `localhost` or `127.0.0.1`
 
 ## Script Element Standard for `.go` files
@@ -41,3 +43,5 @@ Tested in:
 > Put **configurable** `const` and `var` into `.config.go` files
 
 > Name **extended** `.go` files with an extra extension, e.g. `.extended.go`
+
+> Extend `routes` by route/url functions, e.g. `.login.go`, `.getFileList.go`, etc.
