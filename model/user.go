@@ -33,20 +33,20 @@ func GetActiveUsersCount() (count int64, ok bool) {
 	return
 }
 
-func GetUserById(id string) (user User, hasUser bool) {
+func GetUserById(id string) (user User, ok bool) {
 	result := db.First(&user, "active = 1 AND id = ?", id)
-	hasUser = result.RowsAffected == 1
+	ok = result.RowsAffected == 1
 	return
 }
 
-func GetUserByAccount(account string) (user User, hasUser bool) {
+func GetUserByAccount(account string) (user User, ok bool) {
 	result := db.First(&user, "active = 1 AND account = ?", account)
-	hasUser = result.RowsAffected == 1
+	ok = result.RowsAffected == 1
 	return
 }
 
-func GetUserByAccountPassword(account string, password string) (user User, hasUser bool) {
+func GetUserByAccountPassword(account string, password string) (user User, ok bool) {
 	result := db.First(&user, "active = 1 AND account = ? AND password = ?", account, password)
-	hasUser = result.RowsAffected == 1
+	ok = result.RowsAffected == 1
 	return
 }

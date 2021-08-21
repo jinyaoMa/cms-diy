@@ -11,6 +11,14 @@ import (
 	"github.com/gin-gonic/gin/binding"
 )
 
+func bindQuery(c *gin.Context, query interface{}) (err error) {
+	err = c.ShouldBind(query)
+	if err != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
+	}
+	return
+}
+
 func bindFormPost(c *gin.Context, form interface{}) (err error) {
 	err = c.ShouldBindWith(form, binding.FormPost)
 	if err != nil {

@@ -8,10 +8,10 @@ import (
 )
 
 type SignupForm struct {
-	Username string `form:"username" binding:"required"`
-	Account  string `form:"account" binding:"required"`
-	Password string `form:"password" binding:"required"`
-	Code     string `form:"code" binding:"required"`
+	Username *string `form:"username" binding:"required"`
+	Account  *string `form:"account" binding:"required"`
+	Password *string `form:"password" binding:"required"`
+	Code     *string `form:"code" binding:"required"`
 }
 
 // @Summary Signup
@@ -42,7 +42,7 @@ func signup(c *gin.Context) {
 		return
 	}
 
-	role, hasRole := model.GetRoleByCode(form.Code)
+	role, hasRole := model.GetRoleByCode(*form.Code)
 	if !hasRole {
 		c.JSON(http.StatusNotFound, Json404Response{
 			Error: "invalid invitation code",
@@ -50,7 +50,7 @@ func signup(c *gin.Context) {
 		return
 	}
 
-	userfiles, errCreateUserSpaceFiles := model.CreateUserSpaceFiles(form.Account)
+	userfiles, errCreateUserSpaceFiles := model.CreateUserSpaceFiles(*form.Account)
 	if errCreateUserSpaceFiles != nil {
 		c.JSON(http.StatusNotFound, Json404Response{
 			Error: "invalid user account",
@@ -59,9 +59,9 @@ func signup(c *gin.Context) {
 	}
 
 	newUser := model.User{
-		Name:     form.Username,
-		Account:  form.Account,
-		Password: form.Password,
+		Name:     *form.Username,
+		Account:  *form.Account,
+		Password: *form.Password,
 		RoleID:   role.ID,
 		Files:    userfiles,
 	}

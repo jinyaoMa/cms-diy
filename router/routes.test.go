@@ -11,7 +11,7 @@ import (
 // @Description Test Token
 // @Tags After Authorization
 // @accept plain
-// @Produce  json
+// @Produce json
 // @Security BearerIdAuth
 // @param Authorization header string false "Authorization"
 // @Success 200 {object} Json200Response "{"success":true,"data":{"user":"admin","isTokenValid":true}}"

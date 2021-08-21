@@ -8,8 +8,8 @@ import (
 )
 
 type LoginForm struct {
-	Account  string `form:"account" binding:"required"`
-	Password string `form:"password" binding:"required"`
+	Account  *string `form:"account" binding:"required"`
+	Password *string `form:"password" binding:"required"`
 }
 
 // @Summary Login
@@ -30,7 +30,7 @@ func login(c *gin.Context) {
 		return
 	}
 
-	user, hasUser := model.GetUserByAccountPassword(form.Account, form.Password)
+	user, hasUser := model.GetUserByAccountPassword(*form.Account, *form.Password)
 	if !hasUser {
 		c.JSON(http.StatusNotFound, Json404Response{
 			Error: "unmatched user password",

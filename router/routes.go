@@ -27,5 +27,6 @@ func NewRoutes(r *gin.Engine) {
 		api := apiGroup.Use(Auth())
 		api.GET("/test", test)
 		api.GET("/extendTokenExpireTime", extendTokenExpireTime)
+		api.GET("/getFileList", getFileList)
 	}
 }

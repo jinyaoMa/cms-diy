@@ -13,20 +13,20 @@ type Role struct {
 }
 type Roles []Role
 
-func GetRoleByName(name string) (role Role, hasRole bool) {
+func GetRoleByName(name string) (role Role, ok bool) {
 	result := db.First(&role, "valid = 1 AND name = ?", name)
-	hasRole = result.RowsAffected == 1
+	ok = result.RowsAffected == 1
 	return
 }
 
-func GetRoleById(id uint) (role Role, hasRole bool) {
+func GetRoleById(id uint) (role Role, ok bool) {
 	result := db.First(&role, "valid = 1 AND id = ?", id)
-	hasRole = result.RowsAffected == 1
+	ok = result.RowsAffected == 1
 	return
 }
 
-func GetRoleByCode(code string) (role Role, hasRole bool) {
+func GetRoleByCode(code string) (role Role, ok bool) {
 	result := db.First(&role, "valid = 1 AND code = ?", code)
-	hasRole = result.RowsAffected == 1
+	ok = result.RowsAffected == 1
 	return
 }

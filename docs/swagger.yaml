@@ -49,6 +49,51 @@ paths:
       summary: ExtendTokenExpireTime
       tags:
       - After Authorization
+  /api/getFileList:
+    get:
+      consumes:
+      - text/plain
+      description: Get file list of user space
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        type: string
+      - description: Depth
+        in: query
+        name: depth
+        required: true
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        required: true
+        type: integer
+      - description: Limit
+        in: query
+        name: limit
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{"files":[]}'
+          schema:
+            $ref: '#/definitions/router.Json200Response'
+        "400":
+          description: GetFileListQuery binding error
+        "404":
+          description: '{"error":"error msg"}'
+          schema:
+            $ref: '#/definitions/router.Json404Response'
+        "500":
+          description: Token generating error
+      security:
+      - BearerIdAuth: []
+      summary: GetFileList
+      tags:
+      - After Authorization
   /api/test:
     get:
       consumes:

@@ -27,7 +27,7 @@ type Storage struct {
 	Available Size
 	Free      Size
 }
-type ScannedFileCallback func(apath string, fileInfo os.FileInfo)
+type ScannedFileCallback func(apath string, rpath string, depth int, fileInfo os.FileInfo)
 
 const (
 	B  Size = 1
@@ -102,9 +102,7 @@ func NewUserSpace(userAccount string, fn ScannedFileCallback, isForcedScan bool)
 			if isForcedScan && ScanUserFiles(targetPath, fn) != nil {
 				return newError("User files initializing error")
 			}
-			return newError("User space exists")
-		}
-		if err != nil {
+		} else if err != nil {
 			return err
 		}
 	}
@@ -117,7 +115,16 @@ func ScanUserFiles(userSpace string, fn ScannedFileCallback) error {
 		if fileInfo == nil {
 			return err
 		}
-		fn(apath, fileInfo)
+
+		rpath, errRel := filepath.Rel(userSpace, apath)
+		if errRel != nil {
+			return errRel
+		}
+		if rpath != "." {
+			depth := strings.Count(rpath, string(filepath.Separator))
+			fn(apath, rpath, depth, fileInfo)
+		}
+
 		return nil
 	})
 }
