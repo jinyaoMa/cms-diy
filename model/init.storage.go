@@ -90,8 +90,12 @@ func (s *Storage) Update() {
 	}
 }
 
+func IsFileNameCharValid(str string) bool {
+	return !strings.ContainsAny(str, "\\/:*?\"<>|")
+}
+
 func NewUserSpace(userAccount string, fn ScannedFileCallback, isForcedScan bool) error {
-	if strings.ContainsAny(userAccount, "\\/:*?\"<>|") {
+	if !IsFileNameCharValid(userAccount) {
 		return newError("User account format not allowed")
 	}
 

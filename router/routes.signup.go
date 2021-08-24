@@ -42,8 +42,8 @@ func signup(c *gin.Context) {
 		return
 	}
 
-	role, hasRole := model.GetRoleByCode(*form.Code)
-	if !hasRole {
+	role, ok := model.GetRoleByCode(*form.Code)
+	if !ok {
 		c.JSON(http.StatusNotFound, Json404Response{
 			Error: "invalid invitation code",
 		})

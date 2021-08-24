@@ -94,6 +94,46 @@ paths:
       summary: GetFileList
       tags:
       - After Authorization
+  /api/renameFile:
+    put:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: CHange name of a ile
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        type: string
+      - description: ID
+        in: formData
+        name: id
+        required: true
+        type: integer
+      - description: Filename
+        in: formData
+        name: filename
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{"file":{}}'
+          schema:
+            $ref: '#/definitions/router.Json200Response'
+        "400":
+          description: RenameFileForm binding error
+        "404":
+          description: '{"error":"error msg"}'
+          schema:
+            $ref: '#/definitions/router.Json404Response'
+        "500":
+          description: Token generating error
+      security:
+      - BearerIdAuth: []
+      summary: RenameFile
+      tags:
+      - After Authorization
   /api/test:
     get:
       consumes:

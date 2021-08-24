@@ -18,15 +18,20 @@ func NewRoutes(r *gin.Engine) {
 
 	authGroup := r.Group("/auth")
 	{
-		authGroup.POST("/login", login)
-		authGroup.POST("/signup", signup)
+		auth := authGroup.Use()
+
+		auth.POST("/login", login)
+		auth.POST("/signup", signup)
 	}
 
 	apiGroup := r.Group("/api")
 	{
 		api := apiGroup.Use(Auth())
+
 		api.GET("/test", test)
 		api.GET("/extendTokenExpireTime", extendTokenExpireTime)
 		api.GET("/getFileList", getFileList)
+
+		api.PUT("/renameFile", renameFile)
 	}
 }

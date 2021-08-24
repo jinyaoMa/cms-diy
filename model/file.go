@@ -11,33 +11,24 @@ import (
 )
 
 type File struct {
-	gorm.Model
-	Name           string
+	APIFile
 	APath          string `gorm:"index"` // absolute path
-	RPath          string `gorm:"index"` // relative path (relative to user space folder)
-	IPath          string `gorm:"index"` // id string for absolute path
-	TPath          string `gorm:"index"` // thumbnail path
-	Depth          int
-	Type           string `gorm:"check:type IN ('directory', 'file')"`
-	Ext            string
-	Size           Size
 	ShareCode      string
 	ShareExpiredAt time.Time
-	Recycled       uint `gorm:"check:recycled IN (0, 1);default:0"`
 	UserID         uint
 }
 type Files []File
 type APIFile struct {
 	gorm.Model
 	Name     string
-	RPath    string
-	IPath    string
-	TPath    string
+	RPath    string `gorm:"index"` // relative path (relative to user space folder)
+	IPath    string `gorm:"index"` // id string for absolute path
+	TPath    string `gorm:"index"` // thumbnail path
 	Depth    int
-	Type     string
+	Type     string `gorm:"check:type IN ('directory', 'file')"`
 	Ext      string
 	Size     Size
-	Recycled uint
+	Recycled uint `gorm:"check:recycled IN (0, 1);default:0"`
 }
 type APIFiles []APIFile
 
@@ -46,7 +37,19 @@ const (
 	FILE_TYPE_FILE      string = "file"
 )
 
-func FindFilesByUser(user User, depth int, offset int, limit int) (userFiles APIFiles, ok bool) {
+func SaveFile(file File) (ok bool) {
+	result := db.Save(&file)
+	ok = result.RowsAffected == 1
+	return
+}
+
+func GetFileByUserAndId(user User, id uint) (userFile File, ok bool) {
+	result := db.Where("recycled = 0 AND user_id = ? AND id = ?", user.ID, id).First(&userFile)
+	ok = result.RowsAffected == 1
+	return
+}
+
+func FindAPIFilesByUser(user User, depth int, offset int, limit int) (userFiles APIFiles, ok bool) {
 	result := db.Model(&Files{}).
 		Offset(offset).
 		Limit(limit).
@@ -66,14 +69,16 @@ func CreateUserSpaceFiles(userAccount string) (userFiles Files, err error) {
 			fileType = FILE_TYPE_FILE
 		}
 		userFiles = append(userFiles, File{
-			Name:  filepath.Base(apath),
-			IPath: fmt.Sprintf("%x", sha256.Sum256([]byte(apath))),
+			APIFile: APIFile{
+				Name:  filepath.Base(apath),
+				RPath: rpath,
+				IPath: fmt.Sprintf("%x", sha256.Sum256([]byte(apath))),
+				Depth: depth,
+				Type:  fileType,
+				Ext:   filepath.Ext(apath),
+				Size:  Size(fileInfo.Size()),
+			},
 			APath: apath,
-			RPath: rpath,
-			Depth: depth,
-			Type:  fileType,
-			Ext:   filepath.Ext(apath),
-			Size:  Size(fileInfo.Size()),
 		})
 	}, false)
 	if err != nil {
@@ -91,14 +96,16 @@ func InitializeUserSpaceFiles(user User) (userFiles Files, err error) {
 			fileType = FILE_TYPE_FILE
 		}
 		userFiles = append(userFiles, File{
-			Name:   filepath.Base(apath),
-			IPath:  fmt.Sprintf("%x", sha256.Sum256([]byte(apath))),
+			APIFile: APIFile{
+				Name:  filepath.Base(apath),
+				RPath: rpath,
+				IPath: fmt.Sprintf("%x", sha256.Sum256([]byte(apath))),
+				Depth: depth,
+				Type:  fileType,
+				Ext:   filepath.Ext(apath),
+				Size:  Size(fileInfo.Size()),
+			},
 			APath:  apath,
-			RPath:  rpath,
-			Depth:  depth,
-			Type:   fileType,
-			Ext:    filepath.Ext(apath),
-			Size:   Size(fileInfo.Size()),
 			UserID: user.ID,
 		})
 	}, true)

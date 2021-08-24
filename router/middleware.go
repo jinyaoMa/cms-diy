@@ -90,8 +90,8 @@ func Auth() gin.HandlerFunc {
 		}
 
 		userId := matches[1]
-		user, hasUser := model.GetUserById(userId)
-		if !hasUser {
+		user, ok := model.GetUserById(userId)
+		if !ok {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}

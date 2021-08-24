@@ -36,8 +36,8 @@ func getFileList(c *gin.Context) {
 		return
 	}
 
-	files, hasFiles := model.FindFilesByUser(user, *query.Depth, *query.Offset, *query.Limit)
-	if !hasFiles {
+	files, ok := model.FindAPIFilesByUser(user, *query.Depth, *query.Offset, *query.Limit)
+	if !ok {
 		c.JSON(http.StatusNotFound, Json404Response{
 			Error: "no files in user space",
 		})

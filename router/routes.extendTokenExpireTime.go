@@ -6,13 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type ExtendTokenExpireTimeForm struct {
-	Username string `form:"username" binding:"required"`
-	Account  string `form:"account" binding:"required"`
-	Password string `form:"password" binding:"required"`
-	Code     string `form:"code" binding:"required"`
-}
-
 // @Summary ExtendTokenExpireTime
 // @Description Make up a new token to extend expire time
 // @Tags After Authorization

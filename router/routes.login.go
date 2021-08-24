@@ -30,16 +30,16 @@ func login(c *gin.Context) {
 		return
 	}
 
-	user, hasUser := model.GetUserByAccountPassword(*form.Account, *form.Password)
-	if !hasUser {
+	user, userOk := model.GetUserByAccountPassword(*form.Account, *form.Password)
+	if !userOk {
 		c.JSON(http.StatusNotFound, Json404Response{
 			Error: "unmatched user password",
 		})
 		return
 	}
 
-	role, hasRole := model.GetRoleById(user.RoleID)
-	if !hasRole {
+	role, roleOk := model.GetRoleById(user.RoleID)
+	if !roleOk {
 		c.JSON(http.StatusNotFound, Json404Response{
 			Error: "user has no role assigned",
 		})
