@@ -1,10 +1,7 @@
 package model
 
 import (
-	"crypto/sha256"
-	"fmt"
 	"os"
-	"path/filepath"
 	"time"
 
 	"gorm.io/gorm"
@@ -12,11 +9,12 @@ import (
 
 type File struct {
 	APIFile
-	APath          string `gorm:"index"` // absolute path
-	Workspace      string `gorm:"index"` // user root path
-	ShareCode      string
-	ShareExpiredAt time.Time
-	UserID         uint
+	APath               string `gorm:"index"` // absolute path
+	Workspace           string `gorm:"index"` // user root path
+	ShareCode           string
+	ShareExpiredAt      time.Time
+	CanRefreshShareCode bool `gorm:"-"`
+	UserID              uint
 }
 type Files []File
 type APIFile struct {
@@ -38,12 +36,21 @@ const (
 	FILE_TYPE_FILE      string = "file"
 )
 
+func (f *File) BeforeCreate(tx *gorm.DB) (err error) {
+	autoFillDataWithAPath(f)
+	refreshShareCode(f)
+	return nil
+}
+
+func (f *File) BeforeUpdate(tx *gorm.DB) (err error) {
+	autoFillDataWithAPath(f)
+	refreshShareCode(f)
+	return nil
+}
+
 func (f *File) BeforeSave(tx *gorm.DB) (err error) {
-	if f.ShareExpiredAt.After(time.Now()) {
-		f.ShareCode = generateShareCode(4)
-	} else {
-		f.ShareCode = ""
-	}
+	autoFillDataWithAPath(f)
+	refreshShareCode(f)
 	return nil
 }
 
@@ -72,21 +79,11 @@ func FindAPIFilesByUser(user User, depth int, offset int, limit int) (userFiles 
 
 func CreateUserSpaceFiles(userAccount string) (userFiles Files, err error) {
 	err = NewUserSpace(userAccount, func(apath string, rpath string, depth int, workspace string, fileInfo os.FileInfo) {
-		var fileType string
-		if fileInfo.IsDir() {
-			fileType = FILE_TYPE_DIRECTORY
-		} else {
-			fileType = FILE_TYPE_FILE
-		}
+		fileType := getFileType(fileInfo)
 		userFiles = append(userFiles, File{
 			APIFile: APIFile{
-				Name:  filepath.Base(apath),
-				RPath: rpath,
-				IPath: fmt.Sprintf("%x", sha256.Sum256([]byte(apath))),
-				Depth: depth,
-				Type:  fileType,
-				Ext:   filepath.Ext(apath),
-				Size:  Size(fileInfo.Size()),
+				Type: fileType,
+				Size: Size(fileInfo.Size()),
 			},
 			APath:     apath,
 			Workspace: workspace,
@@ -100,21 +97,11 @@ func CreateUserSpaceFiles(userAccount string) (userFiles Files, err error) {
 
 func InitializeUserSpaceFiles(user User) (userFiles Files, err error) {
 	err = NewUserSpace(user.Account, func(apath string, rpath string, depth int, workspace string, fileInfo os.FileInfo) {
-		var fileType string
-		if fileInfo.IsDir() {
-			fileType = FILE_TYPE_DIRECTORY
-		} else {
-			fileType = FILE_TYPE_FILE
-		}
+		fileType := getFileType(fileInfo)
 		userFiles = append(userFiles, File{
 			APIFile: APIFile{
-				Name:  filepath.Base(apath),
-				RPath: rpath,
-				IPath: fmt.Sprintf("%x", sha256.Sum256([]byte(apath))),
-				Depth: depth,
-				Type:  fileType,
-				Ext:   filepath.Ext(apath),
-				Size:  Size(fileInfo.Size()),
+				Type: fileType,
+				Size: Size(fileInfo.Size()),
 			},
 			APath:     apath,
 			Workspace: workspace,

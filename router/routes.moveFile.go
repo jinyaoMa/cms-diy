@@ -1,8 +1,6 @@
 package router
 
 import (
-	"crypto/sha256"
-	"fmt"
 	"jinyaoma/cms-diy/model"
 	"net/http"
 	"os"
@@ -65,20 +63,7 @@ func moveFile(c *gin.Context) {
 		return
 	}
 
-	newRPath, errRPath := filepath.Rel(file.Workspace, newAPath)
-	if errRPath != nil {
-		c.JSON(http.StatusNotFound, Json404Response{
-			Error: "fail to rename rpath",
-		})
-		return
-	}
-
-	file.Name = filepath.Base(newAPath)
 	file.APath = newAPath
-	file.RPath = newRPath
-	file.IPath = fmt.Sprintf("%x", sha256.Sum256([]byte(newAPath)))
-	file.Ext = filepath.Ext(newAPath)
-	file.Depth = strings.Count(newRPath, string(filepath.Separator))
 	updateOk := model.SaveFile(&file)
 	if !updateOk {
 		c.JSON(http.StatusNotFound, Json404Response{

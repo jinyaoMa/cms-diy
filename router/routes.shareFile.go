@@ -52,6 +52,7 @@ func shareFile(c *gin.Context) {
 	}
 
 	file.ShareExpiredAt = expireAt
+	file.CanRefreshShareCode = true
 	updateOk := model.SaveFile(&file)
 	if !updateOk {
 		c.JSON(http.StatusNotFound, Json404Response{
