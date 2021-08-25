@@ -138,6 +138,68 @@ var doc = `{
                 }
             }
         },
+        "/api/moveFile": {
+            "put": {
+                "security": [
+                    {
+                        "BearerIdAuth": []
+                    }
+                ],
+                "description": "Move a file to destination path",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "After Authorization"
+                ],
+                "summary": "MoveFile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "To",
+                        "name": "to",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"success\":true,\"data\":{\"file\":{}}",
+                        "schema": {
+                            "$ref": "#/definitions/router.Json200Response"
+                        }
+                    },
+                    "400": {
+                        "description": "MoveFileForm binding error"
+                    },
+                    "404": {
+                        "description": "{\"error\":\"error msg\"}",
+                        "schema": {
+                            "$ref": "#/definitions/router.Json404Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Token generating error"
+                    }
+                }
+            }
+        },
         "/api/renameFile": {
             "put": {
                 "security": [
@@ -145,7 +207,7 @@ var doc = `{
                         "BearerIdAuth": []
                     }
                 ],
-                "description": "CHange name of a ile",
+                "description": "Change name of a file",
                 "consumes": [
                     "application/x-www-form-urlencoded"
                 ],

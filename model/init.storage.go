@@ -3,6 +3,7 @@ package model
 import (
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"unsafe"
 
@@ -27,7 +28,7 @@ type Storage struct {
 	Available Size
 	Free      Size
 }
-type ScannedFileCallback func(apath string, rpath string, depth int, fileInfo os.FileInfo)
+type ScannedFileCallback func(apath string, rpath string, depth int, workspace string, fileInfo os.FileInfo)
 
 const (
 	B  Size = 1
@@ -94,6 +95,11 @@ func IsFileNameCharValid(str string) bool {
 	return !strings.ContainsAny(str, "\\/:*?\"<>|")
 }
 
+func IsPathCharValid(str string) bool {
+	matched, err := regexp.MatchString("\\.[\\/]", str)
+	return err == nil && !matched && !strings.ContainsAny(str, ":*?\"<>|")
+}
+
 func NewUserSpace(userAccount string, fn ScannedFileCallback, isForcedScan bool) error {
 	if !IsFileNameCharValid(userAccount) {
 		return newError("User account format not allowed")
@@ -126,7 +132,7 @@ func ScanUserFiles(userSpace string, fn ScannedFileCallback) error {
 		}
 		if rpath != "." {
 			depth := strings.Count(rpath, string(filepath.Separator))
-			fn(apath, rpath, depth, fileInfo)
+			fn(apath, rpath, depth, userSpace, fileInfo)
 		}
 
 		return nil

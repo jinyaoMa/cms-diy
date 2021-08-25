@@ -1,6 +1,6 @@
 {
   "name": "cms-diy",
-  "version": "0.0.1-202108240137",
+  "version": "0.0.1-202108242218",
   "description": "try to be a NAS-like CMS",
   "main": "index.js",
   "scripts": {

@@ -7,41 +7,35 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
-type RenameFileForm struct {
-	Id       uint   `form:"id" binding:"required"`
-	Filename string `form:"filename" binding:"required"`
+type MoveFileForm struct {
+	Id uint   `form:"id" binding:"required"`
+	To string `form:"to" binding:"required"`
 }
 
-// @Summary RenameFile
-// @Description Change name of a file
+// @Summary MoveFile
+// @Description Move a file to destination path
 // @Tags After Authorization
 // @accept x-www-form-urlencoded
 // @Produce json
 // @Security BearerIdAuth
 // @param Authorization header string false "Authorization"
 // @Param id formData uint true "ID"
-// @Param filename formData string true "Filename"
+// @Param to formData string true "To"
 // @Success 200 {object} Json200Response "{"success":true,"data":{"file":{}}"
-// @Failure 400 "RenameFileForm binding error"
+// @Failure 400 "MoveFileForm binding error"
 // @Failure 404 {object} Json404Response "{"error":"error msg"}"
 // @Failure 500 "Token generating error"
-// @Router /api/renameFile [put]
-func renameFile(c *gin.Context) {
+// @Router /api/moveFile [put]
+func moveFile(c *gin.Context) {
 	user, _ := getUserClaimsFromAuth(c)
 
-	var form RenameFileForm
+	var form MoveFileForm
 	if bindFormPost(c, &form) != nil {
-		return
-	}
-
-	if !model.IsFileNameCharValid(form.Filename) {
-		c.JSON(http.StatusNotFound, Json404Response{
-			Error: "invalid filename",
-		})
 		return
 	}
 
@@ -53,8 +47,15 @@ func renameFile(c *gin.Context) {
 		return
 	}
 
-	currentDir := filepath.Dir(file.APath)
-	newAPath := filepath.Join(currentDir, form.Filename)
+	targetDir := filepath.Join(file.Workspace, form.To)
+	if !model.IsPathCharValid(form.To) || !strings.HasPrefix(targetDir, file.Workspace) {
+		c.JSON(http.StatusNotFound, Json404Response{
+			Error: "invalid path",
+		})
+		return
+	}
+
+	newAPath := filepath.Join(targetDir, file.Name)
 
 	errRename := os.Rename(file.APath, newAPath)
 	if errRename != nil {
@@ -64,20 +65,20 @@ func renameFile(c *gin.Context) {
 		return
 	}
 
-	newRPath, errRPath := filepath.Rel(currentDir, newAPath)
+	newRPath, errRPath := filepath.Rel(file.Workspace, newAPath)
 	if errRPath != nil {
 		c.JSON(http.StatusNotFound, Json404Response{
 			Error: "fail to rename rpath",
 		})
 		return
 	}
-	// rename only - depth change not needed
 
 	file.Name = filepath.Base(newAPath)
 	file.APath = newAPath
 	file.RPath = newRPath
 	file.IPath = fmt.Sprintf("%x", sha256.Sum256([]byte(newAPath)))
 	file.Ext = filepath.Ext(newAPath)
+	file.Depth = strings.Count(newRPath, string(filepath.Separator))
 	updateOk := model.SaveFile(file)
 	if !updateOk {
 		c.JSON(http.StatusNotFound, Json404Response{

@@ -13,6 +13,7 @@ import (
 type File struct {
 	APIFile
 	APath          string `gorm:"index"` // absolute path
+	Workspace      string `gorm:"index"` // user root path
 	ShareCode      string
 	ShareExpiredAt time.Time
 	UserID         uint
@@ -61,7 +62,7 @@ func FindAPIFilesByUser(user User, depth int, offset int, limit int) (userFiles 
 }
 
 func CreateUserSpaceFiles(userAccount string) (userFiles Files, err error) {
-	err = NewUserSpace(userAccount, func(apath string, rpath string, depth int, fileInfo os.FileInfo) {
+	err = NewUserSpace(userAccount, func(apath string, rpath string, depth int, workspace string, fileInfo os.FileInfo) {
 		var fileType string
 		if fileInfo.IsDir() {
 			fileType = FILE_TYPE_DIRECTORY
@@ -78,7 +79,8 @@ func CreateUserSpaceFiles(userAccount string) (userFiles Files, err error) {
 				Ext:   filepath.Ext(apath),
 				Size:  Size(fileInfo.Size()),
 			},
-			APath: apath,
+			APath:     apath,
+			Workspace: workspace,
 		})
 	}, false)
 	if err != nil {
@@ -88,7 +90,7 @@ func CreateUserSpaceFiles(userAccount string) (userFiles Files, err error) {
 }
 
 func InitializeUserSpaceFiles(user User) (userFiles Files, err error) {
-	err = NewUserSpace(user.Account, func(apath string, rpath string, depth int, fileInfo os.FileInfo) {
+	err = NewUserSpace(user.Account, func(apath string, rpath string, depth int, workspace string, fileInfo os.FileInfo) {
 		var fileType string
 		if fileInfo.IsDir() {
 			fileType = FILE_TYPE_DIRECTORY
@@ -105,8 +107,9 @@ func InitializeUserSpaceFiles(user User) (userFiles Files, err error) {
 				Ext:   filepath.Ext(apath),
 				Size:  Size(fileInfo.Size()),
 			},
-			APath:  apath,
-			UserID: user.ID,
+			APath:     apath,
+			Workspace: workspace,
+			UserID:    user.ID,
 		})
 	}, true)
 	if err != nil {
