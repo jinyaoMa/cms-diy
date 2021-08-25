@@ -20,7 +20,7 @@ type Branch struct {
 	Available Size
 	Free      Size
 }
-type Branches []Branch
+type Branches []*Branch
 type Storage struct {
 	branches  Branches
 	All       Size
@@ -54,9 +54,9 @@ func init_storage() {
 		if err != nil {
 			panic("Failed to locate workspace")
 		}
-		storage.branches = append(storage.branches, Branch{
+		storage.branches = append(storage.branches, &Branch{
 			pointer: ptr,
-			APath:   apath,
+			APath:   filepath.Join(apath, "."),
 		})
 	}
 
@@ -68,12 +68,16 @@ func (s *Storage) Update() {
 	s.All = 0
 	s.Available = 0
 
-	var checkedVolumes string
+	checkedVolumes := ""
 	for _, branch := range s.branches {
-		_, _, _ = cmd.Call(uintptr(unsafe.Pointer(&branch.pointer)),
-			uintptr(unsafe.Pointer(&branch.Free)),
-			uintptr(unsafe.Pointer(&branch.All)),
-			uintptr(unsafe.Pointer(&branch.Available)))
+		var free, all, available Size
+		_, _, _ = cmd.Call(uintptr(unsafe.Pointer(branch.pointer)),
+			uintptr(unsafe.Pointer(&free)),
+			uintptr(unsafe.Pointer(&all)),
+			uintptr(unsafe.Pointer(&available)))
+		branch.Free = free
+		branch.All = all
+		branch.Available = available
 		branch.Used = branch.All - branch.Free
 
 		volume := filepath.VolumeName(branch.APath)
@@ -98,6 +102,22 @@ func IsFileNameCharValid(str string) bool {
 func IsPathCharValid(str string) bool {
 	matched, err := regexp.MatchString("\\.[\\/]", str)
 	return err == nil && !matched && !strings.ContainsAny(str, ":*?\"<>|")
+}
+
+func GetValidUserWorkspace(userAccount string, size Size) (validUserWorkspace string, ok bool) {
+	storage.Update()
+	if storage.Available >= size {
+		for _, branch := range storage.branches {
+			if branch.Available >= size {
+				validUserWorkspace = filepath.Join(branch.APath, userAccount)
+				ok = true
+				return
+			}
+		}
+	}
+	validUserWorkspace = ""
+	ok = false
+	return
 }
 
 func NewUserSpace(userAccount string, fn ScannedFileCallback, isForcedScan bool) error {

@@ -13,6 +13,12 @@ type Role struct {
 }
 type Roles []Role
 
+func GetSpaceForUser(user User) (size Size, ok bool) {
+	result := db.Raw("select space from roles where deleted_at IS NULL AND valid = 1 AND role_id = ?", user.RoleID).Scan(&size)
+	ok = result.Error == nil
+	return
+}
+
 func GetRoleByName(name string) (role Role, ok bool) {
 	result := db.First(&role, "valid = 1 AND name = ?", name)
 	ok = result.RowsAffected == 1

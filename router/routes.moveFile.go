@@ -22,7 +22,7 @@ type MoveFileForm struct {
 // @Produce json
 // @Security BearerIdAuth
 // @param Authorization header string false "Authorization"
-// @Param id formData uint true "ID"
+// @Param id formData uint true "File ID"
 // @Param to formData string true "To"
 // @Success 200 {object} Json200Response "{"success":true,"data":{"file":{}}"
 // @Failure 400 "MoveFileForm binding error"

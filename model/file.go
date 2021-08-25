@@ -54,6 +54,18 @@ func (f *File) BeforeSave(tx *gorm.DB) (err error) {
 	return nil
 }
 
+func CreateFile(file *File) (ok bool) {
+	result := db.Create(file)
+	ok = result.RowsAffected == 1
+	return
+}
+
+func GetUsedSpaceForUser(user User) (size Size, ok bool) {
+	result := db.Raw("select sum(size) from files where deleted_at IS NULL AND user_id = ?", user.ID).Scan(&size)
+	ok = result.Error == nil
+	return
+}
+
 func SaveFile(file *File) (ok bool) {
 	result := db.Save(file)
 	ok = result.RowsAffected == 1

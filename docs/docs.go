@@ -30,45 +30,6 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/extendTokenExpireTime": {
-            "get": {
-                "security": [
-                    {
-                        "BearerIdAuth": []
-                    }
-                ],
-                "description": "Make up a new token to extend expire time",
-                "consumes": [
-                    "text/plain"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "After Authorization"
-                ],
-                "summary": "ExtendTokenExpireTime",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization",
-                        "name": "Authorization",
-                        "in": "header"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{\"success\":true,\"data\":{\"token\":\"\"}}",
-                        "schema": {
-                            "$ref": "#/definitions/router.Json200Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Token generating error"
-                    }
-                }
-            }
-        },
         "/api/getFileList": {
             "get": {
                 "security": [
@@ -138,6 +99,45 @@ var doc = `{
                 }
             }
         },
+        "/api/getNewToken": {
+            "get": {
+                "security": [
+                    {
+                        "BearerIdAuth": []
+                    }
+                ],
+                "description": "Make up a new token to extend expire time",
+                "consumes": [
+                    "text/plain"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "After Authorization"
+                ],
+                "summary": "GetNewToken",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"success\":true,\"data\":{\"token\":\"\"}}",
+                        "schema": {
+                            "$ref": "#/definitions/router.Json200Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Token generating error"
+                    }
+                }
+            }
+        },
         "/api/moveFile": {
             "put": {
                 "security": [
@@ -165,7 +165,7 @@ var doc = `{
                     },
                     {
                         "type": "integer",
-                        "description": "ID",
+                        "description": "File ID",
                         "name": "id",
                         "in": "formData",
                         "required": true
@@ -187,6 +187,68 @@ var doc = `{
                     },
                     "400": {
                         "description": "MoveFileForm binding error"
+                    },
+                    "404": {
+                        "description": "{\"error\":\"error msg\"}",
+                        "schema": {
+                            "$ref": "#/definitions/router.Json404Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Token generating error"
+                    }
+                }
+            }
+        },
+        "/api/newFolder": {
+            "post": {
+                "security": [
+                    {
+                        "BearerIdAuth": []
+                    }
+                ],
+                "description": "Change name of a file",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "After Authorization"
+                ],
+                "summary": "NewFolder",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Destination ID (root - 0)",
+                        "name": "id",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Directory Name",
+                        "name": "name",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"success\":true,\"data\":{\"file\":{}}",
+                        "schema": {
+                            "$ref": "#/definitions/router.Json200Response"
+                        }
+                    },
+                    "400": {
+                        "description": "NewFolderForm binding error"
                     },
                     "404": {
                         "description": "{\"error\":\"error msg\"}",
@@ -227,7 +289,7 @@ var doc = `{
                     },
                     {
                         "type": "integer",
-                        "description": "ID",
+                        "description": "File ID",
                         "name": "id",
                         "in": "formData",
                         "required": true
@@ -289,7 +351,7 @@ var doc = `{
                     },
                     {
                         "type": "integer",
-                        "description": "ID",
+                        "description": "File ID",
                         "name": "id",
                         "in": "formData",
                         "required": true

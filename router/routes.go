@@ -29,8 +29,10 @@ func NewRoutes(r *gin.Engine) {
 		api := apiGroup.Use(Auth())
 
 		api.GET("/test", test)
-		api.GET("/extendTokenExpireTime", extendTokenExpireTime)
+		api.GET("/getNewToken", getNewToken)
 		api.GET("/getFileList", getFileList)
+
+		api.POST("/newFolder", newFolder)
 
 		api.PUT("/renameFile", renameFile)
 		api.PUT("/moveFile", moveFile)

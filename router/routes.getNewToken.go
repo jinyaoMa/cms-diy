@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// @Summary ExtendTokenExpireTime
+// @Summary GetNewToken
 // @Description Make up a new token to extend expire time
 // @Tags After Authorization
 // @accept plain
@@ -15,8 +15,8 @@ import (
 // @param Authorization header string false "Authorization"
 // @Success 200 {object} Json200Response "{"success":true,"data":{"token":""}}"
 // @Failure 500 "Token generating error"
-// @Router /api/extendTokenExpireTime [get]
-func extendTokenExpireTime(c *gin.Context) {
+// @Router /api/getNewToken [get]
+func getNewToken(c *gin.Context) {
 	user, claims := getUserClaimsFromAuth(c)
 	token, err := refreshToken(c, user, *claims)
 	if err != nil {

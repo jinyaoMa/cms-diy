@@ -21,7 +21,7 @@ type RenameFileForm struct {
 // @Produce json
 // @Security BearerIdAuth
 // @param Authorization header string false "Authorization"
-// @Param id formData uint true "ID"
+// @Param id formData uint true "File ID"
 // @Param filename formData string true "Filename"
 // @Success 200 {object} Json200Response "{"success":true,"data":{"file":{}}"
 // @Failure 400 "RenameFileForm binding error"
