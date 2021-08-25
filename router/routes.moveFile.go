@@ -79,7 +79,7 @@ func moveFile(c *gin.Context) {
 	file.IPath = fmt.Sprintf("%x", sha256.Sum256([]byte(newAPath)))
 	file.Ext = filepath.Ext(newAPath)
 	file.Depth = strings.Count(newRPath, string(filepath.Separator))
-	updateOk := model.SaveFile(file)
+	updateOk := model.SaveFile(&file)
 	if !updateOk {
 		c.JSON(http.StatusNotFound, Json404Response{
 			Error: "fail to save filename",

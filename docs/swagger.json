@@ -246,6 +246,68 @@
                 }
             }
         },
+        "/api/shareFile": {
+            "put": {
+                "security": [
+                    {
+                        "BearerIdAuth": []
+                    }
+                ],
+                "description": "Update the share state of a file",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "After Authorization"
+                ],
+                "summary": "ShareFile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID",
+                        "name": "id",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "ExpireAt",
+                        "name": "expire",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"success\":true,\"data\":{\"file\":{}}",
+                        "schema": {
+                            "$ref": "#/definitions/router.Json200Response"
+                        }
+                    },
+                    "400": {
+                        "description": "ShareFileForm binding error"
+                    },
+                    "404": {
+                        "description": "{\"error\":\"error msg\"}",
+                        "schema": {
+                            "$ref": "#/definitions/router.Json404Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Token generating error"
+                    }
+                }
+            }
+        },
         "/api/test": {
             "get": {
                 "security": [

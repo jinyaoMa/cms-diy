@@ -174,6 +174,46 @@ paths:
       summary: RenameFile
       tags:
       - After Authorization
+  /api/shareFile:
+    put:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Update the share state of a file
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        type: string
+      - description: ID
+        in: formData
+        name: id
+        required: true
+        type: integer
+      - description: ExpireAt
+        in: formData
+        name: expire
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{"file":{}}'
+          schema:
+            $ref: '#/definitions/router.Json200Response'
+        "400":
+          description: ShareFileForm binding error
+        "404":
+          description: '{"error":"error msg"}'
+          schema:
+            $ref: '#/definitions/router.Json404Response'
+        "500":
+          description: Token generating error
+      security:
+      - BearerIdAuth: []
+      summary: ShareFile
+      tags:
+      - After Authorization
   /api/test:
     get:
       consumes:

@@ -38,8 +38,17 @@ const (
 	FILE_TYPE_FILE      string = "file"
 )
 
-func SaveFile(file File) (ok bool) {
-	result := db.Save(&file)
+func (f *File) BeforeSave(tx *gorm.DB) (err error) {
+	if f.ShareExpiredAt.After(time.Now()) {
+		f.ShareCode = generateShareCode(4)
+	} else {
+		f.ShareCode = ""
+	}
+	return nil
+}
+
+func SaveFile(file *File) (ok bool) {
+	result := db.Save(file)
 	ok = result.RowsAffected == 1
 	return
 }
