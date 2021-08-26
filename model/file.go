@@ -2,6 +2,7 @@ package model
 
 import (
 	"os"
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -54,6 +55,53 @@ func (f *File) BeforeSave(tx *gorm.DB) (err error) {
 	return nil
 }
 
+func RecycleFilesByUser(user User) (recycledFiles APIFiles, ok bool) {
+	resultFind := db.
+		Model(&Files{}).
+		Where("recycled = 0 AND user_id = ?", user.ID).
+		Order("type, r_path").
+		Find(&recycledFiles)
+	if resultFind.RowsAffected < 1 {
+		ok = false
+		return
+	}
+
+	ids := []uint{}
+	for i, f := range recycledFiles {
+		ids = append(ids, f.ID)
+		recycledFiles[i].Recycled = 1
+	}
+	resultUpdate := db.Table("files").Where("id IN ?", ids).Update("recycled", 1)
+	ok = resultUpdate.RowsAffected == resultFind.RowsAffected
+	return
+}
+
+func RecycleFile(file File) (recycledFiles APIFiles, ok bool) {
+	apath := file.APath
+	if os.PathSeparator == '\\' {
+		apath = strings.ReplaceAll(file.APath, "\\", "\\\\")
+	}
+
+	resultFind := db.
+		Model(&Files{}).
+		Where("recycled = 0 AND a_path LIKE ? AND user_id = ?", apath+"%%", file.UserID).
+		Order("type, r_path").
+		Find(&recycledFiles)
+	if resultFind.RowsAffected < 1 {
+		ok = false
+		return
+	}
+
+	ids := []uint{}
+	for i, f := range recycledFiles {
+		ids = append(ids, f.ID)
+		recycledFiles[i].Recycled = 1
+	}
+	resultUpdate := db.Table("files").Where("id IN ?", ids).Update("recycled", 1)
+	ok = resultUpdate.RowsAffected == resultFind.RowsAffected
+	return
+}
+
 func CreateFile(file *File) (ok bool) {
 	result := db.Create(file)
 	ok = result.RowsAffected == 1
@@ -73,7 +121,9 @@ func SaveFile(file *File) (ok bool) {
 }
 
 func GetFileByUserAndId(user User, id uint) (userFile File, ok bool) {
-	result := db.Where("recycled = 0 AND user_id = ? AND id = ?", user.ID, id).First(&userFile)
+	result := db.
+		Where("recycled = 0 AND user_id = ? AND id = ?", user.ID, id).
+		First(&userFile)
 	ok = result.RowsAffected == 1
 	return
 }

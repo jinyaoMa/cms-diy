@@ -34,7 +34,10 @@ func autoFillDataWithAPath(file *File) error {
 }
 
 func refreshShareCode(file *File) {
-	if file.CanRefreshShareCode {
+	if file.Recycled == 1 {
+		file.ShareCode = ""
+		file.ShareExpiredAt = time.Now()
+	} else if file.CanRefreshShareCode {
 		if file.ShareExpiredAt.After(time.Now()) {
 			file.ShareCode = generateShareCode(4)
 		} else {

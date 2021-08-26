@@ -174,6 +174,41 @@ paths:
       summary: NewFolder
       tags:
       - After Authorization
+  /api/recycle:
+    put:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Set a file/directory to be recycled
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        type: string
+      - description: File/Directory ID (root - 0)
+        in: formData
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{"files":[]}'
+          schema:
+            $ref: '#/definitions/router.Json200Response'
+        "400":
+          description: RecycleForm binding error
+        "404":
+          description: '{"error":"error msg"}'
+          schema:
+            $ref: '#/definitions/router.Json404Response'
+        "500":
+          description: Token generating error
+      security:
+      - BearerIdAuth: []
+      summary: Recycle
+      tags:
+      - After Authorization
   /api/renameFile:
     put:
       consumes:

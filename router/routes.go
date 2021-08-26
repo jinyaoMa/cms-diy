@@ -37,5 +37,6 @@ func NewRoutes(r *gin.Engine) {
 		api.PUT("/renameFile", renameFile)
 		api.PUT("/moveFile", moveFile)
 		api.PUT("/shareFile", shareFile)
+		api.PUT("/recycle", recycle)
 	}
 }

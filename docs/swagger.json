@@ -246,6 +246,61 @@
                 }
             }
         },
+        "/api/recycle": {
+            "put": {
+                "security": [
+                    {
+                        "BearerIdAuth": []
+                    }
+                ],
+                "description": "Set a file/directory to be recycled",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "After Authorization"
+                ],
+                "summary": "Recycle",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "File/Directory ID (root - 0)",
+                        "name": "id",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"success\":true,\"data\":{\"files\":[]}",
+                        "schema": {
+                            "$ref": "#/definitions/router.Json200Response"
+                        }
+                    },
+                    "400": {
+                        "description": "RecycleForm binding error"
+                    },
+                    "404": {
+                        "description": "{\"error\":\"error msg\"}",
+                        "schema": {
+                            "$ref": "#/definitions/router.Json404Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Token generating error"
+                    }
+                }
+            }
+        },
         "/api/renameFile": {
             "put": {
                 "security": [
