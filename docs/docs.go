@@ -30,6 +30,61 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/deleteFile": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerIdAuth": []
+                    }
+                ],
+                "description": "Delete a file/directory permanently",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "After Authorization"
+                ],
+                "summary": "DeleteFile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "File/Directory ID (root - 0)",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"success\":true,\"data\":{\"files\":[]}",
+                        "schema": {
+                            "$ref": "#/definitions/router.Json200Response"
+                        }
+                    },
+                    "400": {
+                        "description": "DeleteFileForm binding error"
+                    },
+                    "404": {
+                        "description": "{\"error\":\"error msg\"}",
+                        "schema": {
+                            "$ref": "#/definitions/router.Json404Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Token generating error"
+                    }
+                }
+            }
+        },
         "/api/getFileList": {
             "get": {
                 "security": [
@@ -279,7 +334,7 @@ var doc = `{
                 "tags": [
                     "After Authorization"
                 ],
-                "summary": "Recycle",
+                "summary": "RecycleFile",
                 "parameters": [
                     {
                         "type": "string",
@@ -303,7 +358,7 @@ var doc = `{
                         }
                     },
                     "400": {
-                        "description": "RecycleForm binding error"
+                        "description": "RecycleFileForm binding error"
                     },
                     "404": {
                         "description": "{\"error\":\"error msg\"}",

@@ -25,6 +25,41 @@ info:
   title: CMS_DIY (BACKEND)
   version: 0.0.1
 paths:
+  /api/deleteFile:
+    delete:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Delete a file/directory permanently
+      parameters:
+      - description: Authorization
+        in: header
+        name: Authorization
+        type: string
+      - description: File/Directory ID (root - 0)
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"success":true,"data":{"files":[]}'
+          schema:
+            $ref: '#/definitions/router.Json200Response'
+        "400":
+          description: DeleteFileForm binding error
+        "404":
+          description: '{"error":"error msg"}'
+          schema:
+            $ref: '#/definitions/router.Json404Response'
+        "500":
+          description: Token generating error
+      security:
+      - BearerIdAuth: []
+      summary: DeleteFile
+      tags:
+      - After Authorization
   /api/getFileList:
     get:
       consumes:
@@ -197,7 +232,7 @@ paths:
           schema:
             $ref: '#/definitions/router.Json200Response'
         "400":
-          description: RecycleForm binding error
+          description: RecycleFileForm binding error
         "404":
           description: '{"error":"error msg"}'
           schema:
@@ -206,7 +241,7 @@ paths:
           description: Token generating error
       security:
       - BearerIdAuth: []
-      summary: Recycle
+      summary: RecycleFile
       tags:
       - After Authorization
   /api/renameFile:

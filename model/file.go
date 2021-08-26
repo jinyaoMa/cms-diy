@@ -55,6 +55,59 @@ func (f *File) BeforeSave(tx *gorm.DB) (err error) {
 	return nil
 }
 
+func DeleteFilesByUser(user User) (deletedFiles APIFiles, ok bool) {
+	resultFind := db.
+		Model(&Files{}).
+		Where("recycled = 1 AND user_id = ?", user.ID).
+		Order("type, r_path").
+		Find(&deletedFiles)
+	if resultFind.RowsAffected < 1 {
+		ok = false
+		return
+	}
+
+	ids := []uint{}
+	for i, f := range deletedFiles {
+		ids = append(ids, f.ID)
+		deletedFiles[i].DeletedAt = gorm.DeletedAt{
+			Time:  time.Now(),
+			Valid: true,
+		}
+	}
+	resultDelete := db.Where("id IN ?", ids).Delete(Files{})
+	ok = resultDelete.RowsAffected == resultFind.RowsAffected
+	return
+}
+
+func DeleteFile(file File) (deletedFiles APIFiles, ok bool) {
+	apath := file.APath
+	if os.PathSeparator == '\\' {
+		apath = strings.ReplaceAll(file.APath, "\\", "\\\\")
+	}
+
+	resultFind := db.
+		Model(&Files{}).
+		Where("recycled = 1 AND a_path LIKE ? AND user_id = ?", apath+"%%", file.UserID).
+		Order("type, r_path").
+		Find(&deletedFiles)
+	if resultFind.RowsAffected < 1 {
+		ok = false
+		return
+	}
+
+	ids := []uint{}
+	for i, f := range deletedFiles {
+		ids = append(ids, f.ID)
+		deletedFiles[i].DeletedAt = gorm.DeletedAt{
+			Time:  time.Now(),
+			Valid: true,
+		}
+	}
+	resultDelete := db.Where("id IN ?", ids).Delete(Files{})
+	ok = resultDelete.RowsAffected == resultFind.RowsAffected
+	return
+}
+
 func RecycleFilesByUser(user User) (recycledFiles APIFiles, ok bool) {
 	resultFind := db.
 		Model(&Files{}).
@@ -116,6 +169,14 @@ func GetUsedSpaceForUser(user User) (size Size, ok bool) {
 
 func SaveFile(file *File) (ok bool) {
 	result := db.Save(file)
+	ok = result.RowsAffected == 1
+	return
+}
+
+func GetRecycledFileByUserAndId(user User, id uint) (userFile File, ok bool) {
+	result := db.
+		Where("recycled = 1 AND user_id = ? AND id = ?", user.ID, id).
+		First(&userFile)
 	ok = result.RowsAffected == 1
 	return
 }

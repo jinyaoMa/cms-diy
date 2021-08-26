@@ -7,35 +7,35 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type RecycleForm struct {
+type DeleteFileQuery struct {
 	Id *uint `form:"id" binding:"required"` // 0 for at root of user workspace
 }
 
-// @Summary Recycle
-// @Description Set a file/directory to be recycled
+// @Summary DeleteFile
+// @Description Delete a file/directory permanently
 // @Tags After Authorization
 // @accept x-www-form-urlencoded
 // @Produce json
 // @Security BearerIdAuth
 // @param Authorization header string false "Authorization"
-// @Param id formData uint true "File/Directory ID (root - 0)"
+// @Param id query uint true "File/Directory ID (root - 0)"
 // @Success 200 {object} Json200Response "{"success":true,"data":{"files":[]}"
-// @Failure 400 "RecycleForm binding error"
+// @Failure 400 "DeleteFileForm binding error"
 // @Failure 404 {object} Json404Response "{"error":"error msg"}"
 // @Failure 500 "Token generating error"
-// @Router /api/recycle [put]
-func recycle(c *gin.Context) {
+// @Router /api/deleteFile [delete]
+func deleteFile(c *gin.Context) {
 	user, _ := getUserClaimsFromAuth(c)
 
-	var form RecycleForm
-	if bindFormPost(c, &form) != nil {
+	var query DeleteFileQuery
+	if bindQuery(c, &query) != nil {
 		return
 	}
 
-	var recycledFiles model.APIFiles
+	var deletedFiles model.APIFiles
 	var okRF bool
-	if *form.Id > 0 {
-		file, ok := model.GetFileByUserAndId(user, *form.Id)
+	if *query.Id > 0 {
+		file, ok := model.GetRecycledFileByUserAndId(user, *query.Id)
 		if !ok {
 			c.JSON(http.StatusNotFound, Json404Response{
 				Error: "invalid fileId",
@@ -43,18 +43,18 @@ func recycle(c *gin.Context) {
 			return
 		}
 
-		recycledFiles, okRF = model.RecycleFile(file)
+		deletedFiles, okRF = model.DeleteFile(file)
 		if !okRF {
 			c.JSON(http.StatusNotFound, Json404Response{
-				Error: "fail to recycle file/directory",
+				Error: "fail to delete file/directory",
 			})
 			return
 		}
 	} else {
-		recycledFiles, okRF = model.RecycleFilesByUser(user)
+		deletedFiles, okRF = model.DeleteFilesByUser(user)
 		if !okRF {
 			c.JSON(http.StatusNotFound, Json404Response{
-				Error: "fail to recycle all user files/directories",
+				Error: "fail to delete all user files/directories",
 			})
 			return
 		}
@@ -63,7 +63,7 @@ func recycle(c *gin.Context) {
 	c.JSON(http.StatusOK, Json200Response{
 		Success: true,
 		Data: JsonObject{
-			"files": recycledFiles,
+			"files": deletedFiles,
 		},
 	})
 }
