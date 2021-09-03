@@ -1,17 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "\"try to be a NAS-like CMS\"",
-        "title": "CMS_DIY (BACKEND)",
-        "contact": {
-            "name": "Github Issues",
-            "url": "https://github.com/jinyaoMa/cms-diy/issues"
-        },
-        "license": {
-            "name": "MIT",
-            "url": "https://github.com/jinyaoMa/cms-diy/blob/main/LICENSE"
-        },
-        "version": "0.0.1"
+        "contact": {}
     },
     "paths": {
         "/api/deleteFile": {
@@ -659,13 +649,6 @@
         "router.JsonObject": {
             "type": "object",
             "additionalProperties": true
-        }
-    },
-    "securityDefinitions": {
-        "BearerIdAuth": {
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header"
         }
     }
 }

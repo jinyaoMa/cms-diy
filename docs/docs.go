@@ -17,14 +17,7 @@ var doc = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "contact": {
-            "name": "Github Issues",
-            "url": "https://github.com/jinyaoMa/cms-diy/issues"
-        },
-        "license": {
-            "name": "MIT",
-            "url": "https://github.com/jinyaoMa/cms-diy/blob/main/LICENSE"
-        },
+        "contact": {},
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
@@ -676,13 +669,6 @@ var doc = `{
             "type": "object",
             "additionalProperties": true
         }
-    },
-    "securityDefinitions": {
-        "BearerIdAuth": {
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header"
-        }
     }
 }`
 
@@ -697,12 +683,12 @@ type swaggerInfo struct {
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = swaggerInfo{
-	Version:     "0.0.1",
+	Version:     "",
 	Host:        "",
 	BasePath:    "",
 	Schemes:     []string{},
-	Title:       "CMS_DIY (BACKEND)",
-	Description: "\"try to be a NAS-like CMS\"",
+	Title:       "",
+	Description: "",
 }
 
 type s struct{}
