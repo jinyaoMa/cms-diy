@@ -24,7 +24,7 @@ const (
 )
 
 var (
-	StorageBranches []string = []string{"D:/WORKSPACE", "D:/TESTSPACE"}
+	StorageBranches []string = []string{"D:/_cmsdiy0", "D:/_cmsdiy1"}
 	UserLimit       int64    = 5
 	WorkspaceLimit  Size     = 280 * GB
 )

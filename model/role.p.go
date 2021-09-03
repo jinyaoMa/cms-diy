@@ -7,6 +7,7 @@ func prepareDefaultRoles() {
 			{
 				Name:       ROOT_ROLENAME,
 				Space:      storage.Available,
+				Code:       generateToken(ROLE_CODE_SIZE),
 				IsReserved: 1,
 			},
 			{
