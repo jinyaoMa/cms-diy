@@ -4,7 +4,7 @@ const (
 	DB_USER     string = "root"
 	DB_PASSWORD string = "root"
 	DB_HOST     string = "localhost"
-	DB_PORT     string = "7531"
+	DB_PORT     string = "3306"
 	DB_NAME     string = "cmsdiy"
 	DB_CHARSET  string = "utf8mb4"
 
