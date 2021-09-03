@@ -75,6 +75,25 @@ func Cors() gin.HandlerFunc {
 	}
 }
 
+func Index(r *gin.Engine) gin.HandlerFunc {
+	indexRegexp, err := regexp.Compile(`.*/$`)
+	if err != nil {
+		panic("Failed to compile regexp in middleware Index")
+	}
+
+	return func(c *gin.Context) {
+		str := indexRegexp.FindString(c.Request.URL.Path)
+		if str == "" {
+			c.Next()
+		} else {
+			index := c.Request.URL.Path + "index.html"
+			println(index)
+			c.Redirect(http.StatusMovedPermanently, index)
+			return
+		}
+	}
+}
+
 func Auth() gin.HandlerFunc {
 	bearerRegexp, err := regexp.Compile(`^Bearer (\d+) (.+)$`)
 	if err != nil {

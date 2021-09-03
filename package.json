@@ -4,11 +4,10 @@
   "description": "try to be a NAS-like CMS",
   "main": "index.js",
   "scripts": {
-    "go:mod-tidy": "go mod tidy",
     "go:build": "go build main.go",
     "go:build-run": "go build main.go && main.exe",
     "go:start": "main.exe",
-    "swag:init": "swag init"
+    "swag:init": "swag init -g router/init.go"
   },
   "repository": {
     "type": "git",

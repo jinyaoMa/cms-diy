@@ -14,7 +14,7 @@ type Json404Response struct {
 }
 
 func NewRoutes(r *gin.Engine) {
-	r.Use(Cors())
+	r.Use(Cors(), Index(r))
 
 	authGroup := r.Group("/auth")
 	{

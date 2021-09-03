@@ -15,7 +15,15 @@ definitions:
     additionalProperties: true
     type: object
 info:
-  contact: {}
+  contact:
+    name: Github Issues
+    url: https://github.com/jinyaoMa/cms-diy/issues
+  description: '"try to be a NAS-like CMS"'
+  license:
+    name: MIT
+    url: https://github.com/jinyaoMa/cms-diy/blob/main/LICENSE
+  title: CMS_DIY (BACKEND)
+  version: 0.0.1
 paths:
   /api/deleteFile:
     delete:
@@ -418,4 +426,9 @@ paths:
       summary: Signup
       tags:
       - Before Authorization
+securityDefinitions:
+  BearerIdAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
