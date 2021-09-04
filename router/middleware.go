@@ -1,7 +1,6 @@
 package router
 
 import (
-	"fmt"
 	"jinyaoma/cms-diy/model"
 	"net/http"
 	"regexp"
@@ -125,7 +124,7 @@ func Auth() gin.HandlerFunc {
 			return
 		}
 
-		if userId != fmt.Sprintf("%d", claims.UserID) {
+		if userId != parseNumberToString(claims.UserID) {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}

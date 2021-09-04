@@ -95,13 +95,25 @@ func (s *Storage) Update() {
 	}
 }
 
+func IsDirectoryNamedCache(str string) bool {
+	return strings.Compare(str, DIRECTORY_CACHE_NAME) == 0
+}
+
+func IsDirectoryNamedRecycle(str string) bool {
+	return strings.Compare(str, DIRECTORY_RECYCLE_NAME) == 0
+}
+
+func GenerateRecycleAPath(file File) string {
+	return filepath.Join(file.Workspace, DIRECTORY_RECYCLE_NAME, parseNumberToString(file.ID)+".$"+file.Name)
+}
+
 func IsFileNameCharValid(str string) bool {
 	return !strings.ContainsAny(str, "\\/:*?\"<>|")
 }
 
 func IsPathCharValid(str string) bool {
 	matched, err := regexp.MatchString("\\.[\\/]", str)
-	return err == nil && !matched && !strings.ContainsAny(str, ":*?\"<>|")
+	return !(err != nil || matched || strings.ContainsAny(str, ":*?\"<>|"))
 }
 
 func GetValidUserWorkspace(userAccount string, size Size) (validUserWorkspace string, ok bool) {
@@ -135,6 +147,14 @@ func NewUserSpace(userAccount string, fn ScannedFileCallback, isForcedScan bool)
 		} else if err != nil {
 			return err
 		}
+		err = os.Mkdir(filepath.Join(targetPath, DIRECTORY_RECYCLE_NAME), os.ModeDir)
+		if !(err == nil || os.IsExist(err)) {
+			return newError("User '" + DIRECTORY_RECYCLE_NAME + "' initializing error")
+		}
+		err = os.Mkdir(filepath.Join(targetPath, DIRECTORY_CACHE_NAME), os.ModeDir)
+		if !(err == nil || os.IsExist(err)) {
+			return newError("User '" + DIRECTORY_CACHE_NAME + "' initializing error")
+		}
 	}
 
 	return nil
@@ -150,7 +170,7 @@ func ScanUserFiles(userSpace string, fn ScannedFileCallback) error {
 		if errRel != nil {
 			return errRel
 		}
-		if rpath != "." {
+		if !(rpath == "." || IsDirectoryNamedRecycle(fileInfo.Name()) || IsDirectoryNamedCache(fileInfo.Name())) {
 			depth := strings.Count(rpath, string(filepath.Separator))
 			fn(apath, rpath, depth, userSpace, fileInfo)
 		}

@@ -21,10 +21,13 @@ const (
 	ROLE_CODE_SIZE  int = 12
 	SHARE_CODE_SIZE int = 4
 	JWT_KEY_SIZE    int = 16
+
+	DIRECTORY_CACHE_NAME   string = ".cache"
+	DIRECTORY_RECYCLE_NAME string = ".recycle"
 )
 
 var (
-	StorageBranches []string = []string{"D:/_cmsdiy0", "D:/_cmsdiy1"}
+	StorageBranches []string = []string{"D:/_cmsdiy0", "E:/_cmsdiy1"}
 	UserLimit       int64    = 5
 	WorkspaceLimit  Size     = 280 * GB
 )

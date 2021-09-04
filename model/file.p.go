@@ -2,7 +2,6 @@ package model
 
 import (
 	"crypto/sha256"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -28,7 +27,7 @@ func autoFillDataWithAPath(file *File) error {
 		file.Depth = strings.Count(rpath, string(filepath.Separator))
 	}
 	file.RPath = rpath
-	file.IPath = fmt.Sprintf("%x", sha256.Sum256([]byte(file.APath)))
+	file.IPath = parseSum256ToString(sha256.Sum256([]byte(file.APath)))
 	file.Ext = filepath.Ext(file.APath)
 	return nil
 }

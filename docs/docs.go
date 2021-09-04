@@ -65,7 +65,7 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"success\":true,\"data\":{\"files\":[]}",
+                        "description": "{\"success\":true,\"data\":{\"fileCount\":0,\"directoryCount\":0}",
                         "schema": {
                             "$ref": "#/definitions/router.Json200Response"
                         }
@@ -317,7 +317,7 @@ var doc = `{
                 }
             }
         },
-        "/api/recycle": {
+        "/api/recycleFile": {
             "put": {
                 "security": [
                     {
@@ -352,7 +352,7 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "{\"success\":true,\"data\":{\"files\":[]}",
+                        "description": "{\"success\":true,\"data\":{\"fileCount\":0,\"directoryCount\":0}",
                         "schema": {
                             "$ref": "#/definitions/router.Json200Response"
                         }

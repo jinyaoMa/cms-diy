@@ -1,7 +1,6 @@
 package router
 
 import (
-	"fmt"
 	"jinyaoma/cms-diy/model"
 	"net/http"
 	"time"
@@ -55,7 +54,7 @@ func generateToken(c *gin.Context, user model.User) (token string, err error) {
 		StandardClaims: jwt.StandardClaims{
 			Audience:  user.Name,
 			ExpiresAt: now + TOKEN_VALID_TIME_IN_SECOND,
-			Id:        fmt.Sprintf("%d", user.ID),
+			Id:        parseNumberToString(user.ID),
 			IssuedAt:  now,
 			Issuer:    model.ROOT_USERNAME,
 			NotBefore: now,

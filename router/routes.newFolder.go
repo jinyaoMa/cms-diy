@@ -36,6 +36,13 @@ func newFolder(c *gin.Context) {
 		return
 	}
 
+	if model.IsDirectoryNamedCache(form.DirName) || model.IsDirectoryNamedRecycle(form.DirName) {
+		c.JSON(http.StatusNotFound, Json404Response{
+			Error: "dirname '" + form.DirName + "' is reserved",
+		})
+		return
+	}
+
 	if !model.IsFileNameCharValid(form.DirName) {
 		c.JSON(http.StatusNotFound, Json404Response{
 			Error: "invalid folder path",

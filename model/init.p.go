@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"math/rand"
 	"time"
@@ -21,6 +22,14 @@ func newError(s string) error {
 
 func println(s string) {
 	log.Println(s)
+}
+
+func parseNumberToString(num ...interface{}) string {
+	return fmt.Sprintf("%d", num...)
+}
+
+func parseSum256ToString(num [32]byte) string {
+	return fmt.Sprintf("%x", num)
 }
 
 func generateToken(len int) string {

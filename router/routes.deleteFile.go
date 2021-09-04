@@ -19,7 +19,7 @@ type DeleteFileQuery struct {
 // @Security BearerIdAuth
 // @param Authorization header string false "Authorization"
 // @Param id query uint true "File/Directory ID (root - 0)"
-// @Success 200 {object} Json200Response "{"success":true,"data":{"files":[]}"
+// @Success 200 {object} Json200Response "{"success":true,"data":{"fileCount":0,"directoryCount":0}"
 // @Failure 400 "DeleteFileForm binding error"
 // @Failure 404 {object} Json404Response "{"error":"error msg"}"
 // @Failure 500 "Token generating error"
@@ -32,7 +32,7 @@ func deleteFile(c *gin.Context) {
 		return
 	}
 
-	var deletedFiles model.APIFiles
+	var fileCount, directoryCount uint
 	var okRF bool
 	if *query.Id > 0 {
 		file, ok := model.GetRecycledFileByUserAndId(user, *query.Id)
@@ -43,7 +43,7 @@ func deleteFile(c *gin.Context) {
 			return
 		}
 
-		deletedFiles, okRF = model.DeleteFile(file)
+		fileCount, directoryCount, okRF = model.DeleteFile(file)
 		if !okRF {
 			c.JSON(http.StatusNotFound, Json404Response{
 				Error: "fail to delete file/directory",
@@ -51,7 +51,7 @@ func deleteFile(c *gin.Context) {
 			return
 		}
 	} else {
-		deletedFiles, okRF = model.DeleteFilesByUser(user)
+		fileCount, directoryCount, okRF = model.DeleteFilesByUser(user)
 		if !okRF {
 			c.JSON(http.StatusNotFound, Json404Response{
 				Error: "fail to delete all user files/directories",
@@ -63,7 +63,8 @@ func deleteFile(c *gin.Context) {
 	c.JSON(http.StatusOK, Json200Response{
 		Success: true,
 		Data: JsonObject{
-			"files": deletedFiles,
+			"fileCount":      fileCount,
+			"directoryCount": directoryCount,
 		},
 	})
 }

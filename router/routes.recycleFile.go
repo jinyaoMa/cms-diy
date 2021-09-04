@@ -19,11 +19,11 @@ type RecycleFileForm struct {
 // @Security BearerIdAuth
 // @param Authorization header string false "Authorization"
 // @Param id formData uint true "File/Directory ID (root - 0)"
-// @Success 200 {object} Json200Response "{"success":true,"data":{"files":[]}"
+// @Success 200 {object} Json200Response "{"success":true,"data":{"fileCount":0,"directoryCount":0}"
 // @Failure 400 "RecycleFileForm binding error"
 // @Failure 404 {object} Json404Response "{"error":"error msg"}"
 // @Failure 500 "Token generating error"
-// @Router /api/recycle [put]
+// @Router /api/recycleFile [put]
 func recycleFile(c *gin.Context) {
 	user, _ := getUserClaimsFromAuth(c)
 
@@ -32,7 +32,7 @@ func recycleFile(c *gin.Context) {
 		return
 	}
 
-	var recycledFiles model.APIFiles
+	var fileCount, directoryCount uint
 	var okRF bool
 	if *form.Id > 0 {
 		file, ok := model.GetFileByUserAndId(user, *form.Id)
@@ -43,7 +43,7 @@ func recycleFile(c *gin.Context) {
 			return
 		}
 
-		recycledFiles, okRF = model.RecycleFile(file)
+		fileCount, directoryCount, okRF = model.RecycleFile(file)
 		if !okRF {
 			c.JSON(http.StatusNotFound, Json404Response{
 				Error: "fail to recycle file/directory",
@@ -51,7 +51,7 @@ func recycleFile(c *gin.Context) {
 			return
 		}
 	} else {
-		recycledFiles, okRF = model.RecycleFilesByUser(user)
+		fileCount, directoryCount, okRF = model.RecycleFilesByUser(user)
 		if !okRF {
 			c.JSON(http.StatusNotFound, Json404Response{
 				Error: "fail to recycle all user files/directories",
@@ -63,7 +63,8 @@ func recycleFile(c *gin.Context) {
 	c.JSON(http.StatusOK, Json200Response{
 		Success: true,
 		Data: JsonObject{
-			"files": recycledFiles,
+			"fileCount":      fileCount,
+			"directoryCount": directoryCount,
 		},
 	})
 }

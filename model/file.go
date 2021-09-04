@@ -55,100 +55,130 @@ func (f *File) BeforeSave(tx *gorm.DB) (err error) {
 	return nil
 }
 
-func DeleteFilesByUser(user User) (deletedFiles APIFiles, ok bool) {
+func DeleteFilesByUser(user User) (fileCount uint, directoryCount uint, ok bool) {
+	var files Files
 	resultFind := db.
-		Model(&Files{}).
 		Where("recycled = 1 AND user_id = ?", user.ID).
-		Order("type, r_path").
-		Find(&deletedFiles)
+		Order("type desc, depth desc").
+		Find(&files)
 	if resultFind.RowsAffected < 1 {
 		ok = false
 		return
 	}
 
 	ids := []uint{}
-	for i, f := range deletedFiles {
-		ids = append(ids, f.ID)
-		deletedFiles[i].DeletedAt = gorm.DeletedAt{
-			Time:  time.Now(),
-			Valid: true,
+	for _, f := range files {
+		err := os.Remove(GenerateRecycleAPath(f))
+		if err != nil {
+			ok = false
+			return
 		}
+		if f.Type == FILE_TYPE_FILE {
+			fileCount++
+		} else if f.Type == FILE_TYPE_DIRECTORY {
+			directoryCount++
+		}
+		ids = append(ids, f.ID)
 	}
 	resultDelete := db.Where("id IN ?", ids).Delete(Files{})
 	ok = resultDelete.RowsAffected == resultFind.RowsAffected
 	return
 }
 
-func DeleteFile(file File) (deletedFiles APIFiles, ok bool) {
+func DeleteFile(file File) (fileCount uint, directoryCount uint, ok bool) {
 	apath := file.APath
 	if os.PathSeparator == '\\' {
 		apath = strings.ReplaceAll(file.APath, "\\", "\\\\")
 	}
 
+	var files Files
 	resultFind := db.
-		Model(&Files{}).
 		Where("recycled = 1 AND a_path LIKE ? AND user_id = ?", apath+"%%", file.UserID).
-		Order("type, r_path").
-		Find(&deletedFiles)
+		Order("type desc, depth desc").
+		Find(&files)
 	if resultFind.RowsAffected < 1 {
 		ok = false
 		return
 	}
 
 	ids := []uint{}
-	for i, f := range deletedFiles {
-		ids = append(ids, f.ID)
-		deletedFiles[i].DeletedAt = gorm.DeletedAt{
-			Time:  time.Now(),
-			Valid: true,
+	for _, f := range files {
+		err := os.Remove(GenerateRecycleAPath(f))
+		if err != nil {
+			ok = false
+			return
 		}
+		if f.Type == FILE_TYPE_FILE {
+			fileCount++
+		} else if f.Type == FILE_TYPE_DIRECTORY {
+			directoryCount++
+		}
+		ids = append(ids, f.ID)
 	}
 	resultDelete := db.Where("id IN ?", ids).Delete(Files{})
 	ok = resultDelete.RowsAffected == resultFind.RowsAffected
 	return
 }
 
-func RecycleFilesByUser(user User) (recycledFiles APIFiles, ok bool) {
+func RecycleFilesByUser(user User) (fileCount uint, directoryCount uint, ok bool) {
+	var files Files
 	resultFind := db.
-		Model(&Files{}).
 		Where("recycled = 0 AND user_id = ?", user.ID).
-		Order("type, r_path").
-		Find(&recycledFiles)
+		Order("type desc, depth desc").
+		Find(&files)
 	if resultFind.RowsAffected < 1 {
 		ok = false
 		return
 	}
 
 	ids := []uint{}
-	for i, f := range recycledFiles {
+	for _, f := range files {
+		err := os.Rename(f.APath, GenerateRecycleAPath(f))
+		if err != nil {
+			ok = false
+			return
+		}
+		if f.Type == FILE_TYPE_FILE {
+			fileCount++
+		} else if f.Type == FILE_TYPE_DIRECTORY {
+			directoryCount++
+		}
 		ids = append(ids, f.ID)
-		recycledFiles[i].Recycled = 1
 	}
 	resultUpdate := db.Table("files").Where("id IN ?", ids).Update("recycled", 1)
 	ok = resultUpdate.RowsAffected == resultFind.RowsAffected
 	return
 }
 
-func RecycleFile(file File) (recycledFiles APIFiles, ok bool) {
+func RecycleFile(file File) (fileCount uint, directoryCount uint, ok bool) {
 	apath := file.APath
 	if os.PathSeparator == '\\' {
 		apath = strings.ReplaceAll(file.APath, "\\", "\\\\")
 	}
 
+	var files Files
 	resultFind := db.
-		Model(&Files{}).
 		Where("recycled = 0 AND a_path LIKE ? AND user_id = ?", apath+"%%", file.UserID).
-		Order("type, r_path").
-		Find(&recycledFiles)
+		Order("type desc, depth desc").
+		Find(&files)
 	if resultFind.RowsAffected < 1 {
 		ok = false
 		return
 	}
 
 	ids := []uint{}
-	for i, f := range recycledFiles {
+	for _, f := range files {
+		err := os.Rename(f.APath, GenerateRecycleAPath(f))
+		if err != nil {
+			ok = false
+			return
+		}
+		if f.Type == FILE_TYPE_FILE {
+			fileCount++
+		} else if f.Type == FILE_TYPE_DIRECTORY {
+			directoryCount++
+		}
 		ids = append(ids, f.ID)
-		recycledFiles[i].Recycled = 1
 	}
 	resultUpdate := db.Table("files").Where("id IN ?", ids).Update("recycled", 1)
 	ok = resultUpdate.RowsAffected == resultFind.RowsAffected
@@ -201,6 +231,9 @@ func FindAPIFilesByUser(user User, depth int, offset int, limit int) (userFiles 
 }
 
 func CreateUserSpaceFiles(userAccount string) (userFiles Files, err error) {
+	if IsDirectoryNamedCache(userAccount) || IsDirectoryNamedRecycle(userAccount) {
+		return nil, newError("User[" + userAccount + "] cannot be named '" + DIRECTORY_CACHE_NAME + "' or '" + DIRECTORY_RECYCLE_NAME + "'")
+	}
 	err = NewUserSpace(userAccount, func(apath string, rpath string, depth int, workspace string, fileInfo os.FileInfo) {
 		fileType := getFileType(fileInfo)
 		userFiles = append(userFiles, File{

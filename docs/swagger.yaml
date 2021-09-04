@@ -44,7 +44,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: '{"success":true,"data":{"files":[]}'
+          description: '{"success":true,"data":{"fileCount":0,"directoryCount":0}'
           schema:
             $ref: '#/definitions/router.Json200Response'
         "400":
@@ -209,7 +209,7 @@ paths:
       summary: NewFolder
       tags:
       - After Authorization
-  /api/recycle:
+  /api/recycleFile:
     put:
       consumes:
       - application/x-www-form-urlencoded
@@ -228,7 +228,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: '{"success":true,"data":{"files":[]}'
+          description: '{"success":true,"data":{"fileCount":0,"directoryCount":0}'
           schema:
             $ref: '#/definitions/router.Json200Response'
         "400":
