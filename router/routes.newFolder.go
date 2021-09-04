@@ -15,7 +15,7 @@ type NewFolderForm struct {
 }
 
 // @Summary NewFolder
-// @Description Change name of a file
+// @Description Create a new directory in destination path
 // @Tags After Authorization
 // @accept x-www-form-urlencoded
 // @Produce json

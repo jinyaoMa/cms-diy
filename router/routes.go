@@ -33,6 +33,7 @@ func NewRoutes(r *gin.Engine) {
 		api.GET("/getFileList", getFileList)
 
 		api.POST("/newFolder", newFolder)
+		api.POST("/copyFile", copyFile)
 
 		api.PUT("/renameFile", renameFile)
 		api.PUT("/moveFile", moveFile)
