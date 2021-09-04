@@ -434,6 +434,61 @@ var doc = `{
                 }
             }
         },
+        "/api/restoreFile": {
+            "put": {
+                "security": [
+                    {
+                        "BearerIdAuth": []
+                    }
+                ],
+                "description": "Restore a recycled file/directory",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "After Authorization"
+                ],
+                "summary": "RestoreFile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization",
+                        "name": "Authorization",
+                        "in": "header"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "File/Directory ID (root - 0)",
+                        "name": "id",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"success\":true,\"data\":{\"fileCount\":0,\"directoryCount\":0}",
+                        "schema": {
+                            "$ref": "#/definitions/router.Json200Response"
+                        }
+                    },
+                    "400": {
+                        "description": "RestoreFileForm binding error"
+                    },
+                    "404": {
+                        "description": "{\"error\":\"error msg\"}",
+                        "schema": {
+                            "$ref": "#/definitions/router.Json404Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Token generating error"
+                    }
+                }
+            }
+        },
         "/api/shareFile": {
             "put": {
                 "security": [

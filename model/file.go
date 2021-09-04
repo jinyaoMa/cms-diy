@@ -120,6 +120,36 @@ func DeleteFile(file File) (fileCount uint, directoryCount uint, ok bool) {
 	return
 }
 
+func RestoreFilesByUser(user User) (fileCount uint, directoryCount uint, ok bool) {
+	var files Files
+	resultFind := db.
+		Where("recycled = 1 AND user_id = ?", user.ID).
+		Order("type, depth").
+		Find(&files)
+	if resultFind.RowsAffected < 1 {
+		ok = false
+		return
+	}
+
+	ids := []uint{}
+	for _, f := range files {
+		err := os.Rename(GenerateRecycleAPath(f), f.APath)
+		if err != nil {
+			ok = false
+			return
+		}
+		if f.Type == FILE_TYPE_FILE {
+			fileCount++
+		} else if f.Type == FILE_TYPE_DIRECTORY {
+			directoryCount++
+		}
+		ids = append(ids, f.ID)
+	}
+	resultUpdate := db.Table("files").Where("id IN ?", ids).Update("recycled", 0)
+	ok = resultUpdate.RowsAffected == resultFind.RowsAffected
+	return
+}
+
 func RecycleFilesByUser(user User) (fileCount uint, directoryCount uint, ok bool) {
 	var files Files
 	resultFind := db.
@@ -146,6 +176,41 @@ func RecycleFilesByUser(user User) (fileCount uint, directoryCount uint, ok bool
 		ids = append(ids, f.ID)
 	}
 	resultUpdate := db.Table("files").Where("id IN ?", ids).Update("recycled", 1)
+	ok = resultUpdate.RowsAffected == resultFind.RowsAffected
+	return
+}
+
+func RestoreFile(file File) (fileCount uint, directoryCount uint, ok bool) {
+	apath := file.APath
+	if os.PathSeparator == '\\' {
+		apath = strings.ReplaceAll(file.APath, "\\", "\\\\")
+	}
+
+	var files Files
+	resultFind := db.
+		Where("recycled = 1 AND a_path LIKE ? AND user_id = ?", apath+"%%", file.UserID).
+		Order("type, depth").
+		Find(&files)
+	if resultFind.RowsAffected < 1 {
+		ok = false
+		return
+	}
+
+	ids := []uint{}
+	for _, f := range files {
+		err := os.Rename(GenerateRecycleAPath(f), f.APath)
+		if err != nil {
+			ok = false
+			return
+		}
+		if f.Type == FILE_TYPE_FILE {
+			fileCount++
+		} else if f.Type == FILE_TYPE_DIRECTORY {
+			directoryCount++
+		}
+		ids = append(ids, f.ID)
+	}
+	resultUpdate := db.Table("files").Where("id IN ?", ids).Update("recycled", 0)
 	ok = resultUpdate.RowsAffected == resultFind.RowsAffected
 	return
 }
