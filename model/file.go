@@ -85,41 +85,6 @@ func DeleteFilesByUser(user User) (fileCount uint, directoryCount uint, ok bool)
 	return
 }
 
-func DeleteFile(file File) (fileCount uint, directoryCount uint, ok bool) {
-	apath := file.APath
-	if os.PathSeparator == '\\' {
-		apath = strings.ReplaceAll(file.APath, "\\", "\\\\")
-	}
-
-	var files Files
-	resultFind := db.
-		Where("recycled = 1 AND a_path LIKE ? AND user_id = ?", apath+"%%", file.UserID).
-		Order("type desc, depth desc").
-		Find(&files)
-	if resultFind.RowsAffected < 1 {
-		ok = false
-		return
-	}
-
-	ids := []uint{}
-	for _, f := range files {
-		err := os.Remove(GenerateRecycleAPath(f))
-		if err != nil {
-			ok = false
-			return
-		}
-		if f.Type == FILE_TYPE_FILE {
-			fileCount++
-		} else if f.Type == FILE_TYPE_DIRECTORY {
-			directoryCount++
-		}
-		ids = append(ids, f.ID)
-	}
-	resultDelete := db.Where("id IN ?", ids).Delete(Files{})
-	ok = resultDelete.RowsAffected == resultFind.RowsAffected
-	return
-}
-
 func RestoreFilesByUser(user User) (fileCount uint, directoryCount uint, ok bool) {
 	var files Files
 	resultFind := db.
@@ -180,6 +145,41 @@ func RecycleFilesByUser(user User) (fileCount uint, directoryCount uint, ok bool
 	return
 }
 
+func DeleteFile(file File) (fileCount uint, directoryCount uint, ok bool) {
+	apath := file.APath
+	if os.PathSeparator == '\\' {
+		apath = strings.ReplaceAll(file.APath, "\\", "\\\\")
+	}
+
+	var files Files
+	resultFind := db.
+		Where("recycled = 1 AND a_path LIKE ? AND user_id = ?", apath+"%%", file.UserID).
+		Order("type desc, depth desc").
+		Find(&files)
+	if resultFind.RowsAffected < 1 {
+		ok = false
+		return
+	}
+
+	ids := []uint{}
+	for _, f := range files {
+		err := os.Remove(GenerateRecycleAPath(f))
+		if err != nil {
+			ok = false
+			return
+		}
+		if f.Type == FILE_TYPE_FILE {
+			fileCount++
+		} else if f.Type == FILE_TYPE_DIRECTORY {
+			directoryCount++
+		}
+		ids = append(ids, f.ID)
+	}
+	resultDelete := db.Where("id IN ?", ids).Delete(Files{})
+	ok = resultDelete.RowsAffected == resultFind.RowsAffected
+	return
+}
+
 func RestoreFile(file File) (fileCount uint, directoryCount uint, ok bool) {
 	apath := file.APath
 	if os.PathSeparator == '\\' {
@@ -216,6 +216,41 @@ func RestoreFile(file File) (fileCount uint, directoryCount uint, ok bool) {
 }
 
 func RecycleFile(file File) (fileCount uint, directoryCount uint, ok bool) {
+	apath := file.APath
+	if os.PathSeparator == '\\' {
+		apath = strings.ReplaceAll(file.APath, "\\", "\\\\")
+	}
+
+	var files Files
+	resultFind := db.
+		Where("recycled = 0 AND a_path LIKE ? AND user_id = ?", apath+"%%", file.UserID).
+		Order("type desc, depth desc").
+		Find(&files)
+	if resultFind.RowsAffected < 1 {
+		ok = false
+		return
+	}
+
+	ids := []uint{}
+	for _, f := range files {
+		err := os.Rename(f.APath, GenerateRecycleAPath(f))
+		if err != nil {
+			ok = false
+			return
+		}
+		if f.Type == FILE_TYPE_FILE {
+			fileCount++
+		} else if f.Type == FILE_TYPE_DIRECTORY {
+			directoryCount++
+		}
+		ids = append(ids, f.ID)
+	}
+	resultUpdate := db.Table("files").Where("id IN ?", ids).Update("recycled", 1)
+	ok = resultUpdate.RowsAffected == resultFind.RowsAffected
+	return
+}
+
+func MoveFileTo(file File, to File) (fileCount uint, directoryCount uint, ok bool) {
 	apath := file.APath
 	if os.PathSeparator == '\\' {
 		apath = strings.ReplaceAll(file.APath, "\\", "\\\\")
